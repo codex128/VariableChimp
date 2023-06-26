@@ -2,10 +2,10 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package codex.fieldchimp.gui;
+package codex.varchimp.gui;
 
 import com.simsilica.lemur.DefaultRangedValueModel;
-import codex.fieldchimp.Variable;
+import codex.varchimp.Variable;
 
 /**
  *

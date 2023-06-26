@@ -2,9 +2,9 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package codex.fieldchimp;
+package codex.varchimp;
 
-import static codex.fieldchimp.Variable.LOG;
+import static codex.varchimp.Variable.LOG;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.logging.Level;
@@ -16,8 +16,8 @@ import java.util.logging.Level;
  */
 public class Push <T> {
     
-    private Variable<T> user;
-    private String setter;
+    protected Variable<T> user;
+    protected String setter;
     
     public Push(String setter) {
         this.setter = setter;
@@ -29,7 +29,7 @@ public class Push <T> {
     public void push(T value) {
         if (user == null) return;
         try {
-            Method method = user.getSubject().getClass().getMethod(setter, user.getFieldType());
+            Method method = user.getSubject().getClass().getMethod(setter, user.getVariableType());
             method.invoke(user.getSubject(), value);
         } catch (NoSuchMethodException ex) {
             LOG.log(Level.SEVERE, "Setter method does not exist!", ex);

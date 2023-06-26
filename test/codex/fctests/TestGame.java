@@ -4,11 +4,11 @@
  */
 package codex.fctests;
 
-import codex.fieldchimp.FieldChimpAppState;
-import codex.fieldchimp.NumberVar;
-import codex.fieldchimp.Pull;
-import codex.fieldchimp.Push;
-import codex.fieldchimp.gui.FloatContainer;
+import codex.varchimp.VariableChimpAppState;
+import codex.varchimp.NumberVar;
+import codex.varchimp.Pull;
+import codex.varchimp.Push;
+import codex.varchimp.gui.FloatContainer;
 import com.jme3.app.SimpleApplication;
 import com.jme3.input.KeyInput;
 import com.jme3.input.controls.ActionListener;
@@ -28,7 +28,7 @@ import com.simsilica.lemur.style.BaseStyles;
  */
 public class TestGame extends SimpleApplication implements ActionListener {
     
-    FieldChimpAppState fieldChimp;
+    VariableChimpAppState varChimp;
     Spatial bird;
     float velocity = 0f;
     float jumpForce = 1f;
@@ -45,9 +45,9 @@ public class TestGame extends SimpleApplication implements ActionListener {
         BaseStyles.loadGlassStyle();
         GuiGlobals.getInstance().getStyles().setDefaultStyle("glass");
         
-        fieldChimp = new FieldChimpAppState();
-        fieldChimp.registerAllFactories(new FloatContainer(null));
-        stateManager.attach(fieldChimp);
+        varChimp = new VariableChimpAppState();
+        varChimp.registerAllFactories(new FloatContainer(null));
+        stateManager.attach(varChimp);
         //fieldChimp.setEnabled(true);
         
         bird = new Geometry("bird", new Box(1f, 1f, 1f));
@@ -58,14 +58,14 @@ public class TestGame extends SimpleApplication implements ActionListener {
         inputManager.addMapping("start-fieldchimp", new KeyTrigger(KeyInput.KEY_F));
         inputManager.addListener(this, "jump", "start-fieldchimp");
         
-        fieldChimp.register(new NumberVar(this, float.class, new Pull("getX"), new Push("setX")));
-        fieldChimp.register(new NumberVar(this, float.class, new Pull("getJumpForce"), new Push("setJumpForce")));
+        varChimp.register(new NumberVar(this, float.class, new Pull("getX"), new Push("setX")));
+        varChimp.register(new NumberVar(this, float.class, new Pull("getJumpForce"), new Push("setJumpForce")));
         
     }
     @Override
     public void simpleUpdate(float tpf) {
         cam.lookAt(bird.getWorldTranslation(), Vector3f.UNIT_Y);
-        if (!fieldChimp.isEnabled()) {
+        if (!varChimp.isEnabled()) {
             velocity -= gravity;
             bird.move(0f, velocity, 0f);
         }
@@ -75,7 +75,7 @@ public class TestGame extends SimpleApplication implements ActionListener {
         if (!isPressed) return;
         if (name.equals("jump")) velocity = jumpForce;
         else if (name.equals("start-fieldchimp")) {
-            fieldChimp.setEnabled(!fieldChimp.isEnabled());
+            varChimp.setEnabled(!varChimp.isEnabled());
         }
     }
     

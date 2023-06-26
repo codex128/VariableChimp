@@ -2,9 +2,9 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package codex.fieldchimp;
+package codex.varchimp;
 
-import static codex.fieldchimp.Variable.LOG;
+import static codex.varchimp.Variable.LOG;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.logging.Level;
@@ -16,8 +16,8 @@ import java.util.logging.Level;
  */
 public class Pull <T> {
     
-    private Variable<T> user;
-    private String getter;
+    protected Variable<T> user;
+    protected String getter;
     
     public Pull(String getter) {
         this.getter = getter;
@@ -31,7 +31,7 @@ public class Pull <T> {
         if (user == null) return null;
         try {
             Method method = user.getSubject().getClass().getMethod(getter);
-            if (user.getFieldType().isAssignableFrom(method.getReturnType())) {
+            if (user.getVariableType().isAssignableFrom(method.getReturnType())) {
                 T value = (T)method.invoke(user.getSubject());
                 //if (!sneaky) setLastAccessValue(value);
                 return value;

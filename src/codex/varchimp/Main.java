@@ -1,4 +1,4 @@
-package codex.fieldchimp;
+package codex.varchimp;
 
 import com.jme3.app.SimpleApplication;
 import com.jme3.material.Material;

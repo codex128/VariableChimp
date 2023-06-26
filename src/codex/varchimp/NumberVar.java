@@ -2,7 +2,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package codex.fieldchimp;
+package codex.varchimp;
 
 import com.simsilica.lemur.DefaultRangedValueModel;
 import com.simsilica.lemur.RangedValueModel;
@@ -26,7 +26,7 @@ public class NumberVar <T extends Number> extends AbstractVariable<T> {
     }
     
     @Override
-    public Class<T> getFieldType() {
+    public Class<T> getVariableType() {
         return type;
     }
     

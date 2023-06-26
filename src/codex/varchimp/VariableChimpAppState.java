@@ -2,9 +2,9 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package codex.fieldchimp;
+package codex.varchimp;
 
-import codex.fieldchimp.gui.VariableContainer;
+import codex.varchimp.gui.VariableContainer;
 import com.jme3.app.Application;
 import com.jme3.app.state.BaseAppState;
 import com.jme3.math.ColorRGBA;
@@ -16,16 +16,16 @@ import com.simsilica.lemur.event.PopupState;
 import java.util.LinkedList;
 import java.util.logging.Logger;
 import java.util.logging.Level;
-import codex.fieldchimp.gui.VariableContainerFactory;
+import codex.varchimp.gui.VariableContainerFactory;
 
 /**
  *
  * @author gary
  */
-public class FieldChimpAppState extends BaseAppState {
+public class VariableChimpAppState extends BaseAppState {
     
     public static final String FIELD_USERDATA = "FieldChimp[field]";
-    private static final Logger LOG = Logger.getLogger(FieldChimpAppState.class.getName());
+    private static final Logger LOG = Logger.getLogger(VariableChimpAppState.class.getName());
     
     LinkedList<Variable> variables = new LinkedList<>();
     LinkedList<Variable> preInitVars = new LinkedList<>();
@@ -38,7 +38,7 @@ public class FieldChimpAppState extends BaseAppState {
     boolean cursorLocked = false;
     boolean popupOpen = false;
     
-    public FieldChimpAppState() {
+    public VariableChimpAppState() {
         setEnabled(false);
     }
     
@@ -128,7 +128,7 @@ public class FieldChimpAppState extends BaseAppState {
         });
     }
     public void pullChanges() {
-        containers.stream().filter(f -> f.getVariable().fieldChanged()).forEach(f -> {
+        containers.stream().filter(f -> f.getVariable().variableChanged()).forEach(f -> {
             f.pullFieldValue();
             f.getReference().update();
         });
