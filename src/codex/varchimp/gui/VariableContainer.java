@@ -12,7 +12,7 @@ import com.simsilica.lemur.FillMode;
 import com.simsilica.lemur.Label;
 import com.simsilica.lemur.component.BoxLayout;
 import com.simsilica.lemur.core.VersionedReference;
-import codex.varchimp.Variable;
+import codex.varchimp.VariablePointer;
 
 /**
  *
@@ -21,12 +21,12 @@ import codex.varchimp.Variable;
  */
 public abstract class VariableContainer <T> extends Container implements VariableContainerFactory {
     
-    protected final Variable<T> variable;
+    protected final VariablePointer<T> variable;
     protected Container editContainer, buttonContainer;
     protected VersionedReference reference;
     private boolean initialized = false;
     
-    public VariableContainer(Variable<T> variable) {
+    public VariableContainer(VariablePointer<T> variable) {
         this.variable = variable;
     }
     
@@ -55,6 +55,9 @@ public abstract class VariableContainer <T> extends Container implements Variabl
         buttonContainer.setLayout(new BoxLayout(Axis.X, FillMode.Even));
         initButtons();
         initEditingGui();
+        if (reference == null) {
+            throw new NullPointerException("Versioned reference was not initialized, please initialize reference during initialization.");
+        }
         initialized = true;
         pullFieldValue();
     }
@@ -80,7 +83,11 @@ public abstract class VariableContainer <T> extends Container implements Variabl
         variable.setVariableValue(push());
     }
     
-    public Variable<T> getVariable() {
+    protected void setReference(VersionedReference ref) {
+        reference = ref;
+    }
+    
+    public VariablePointer<T> getVariable() {
         return variable;
     }
     public VersionedReference getReference() {

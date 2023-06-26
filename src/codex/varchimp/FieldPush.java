@@ -22,7 +22,7 @@ public class FieldPush <T> extends Push<T> {
     }
     
     @Override
-    public void setUser(Variable<T> user) {
+    public void setUser(VariablePointer<T> user) {
         super.setUser(user);
         if (this.user != null) {
             try {
