@@ -2,9 +2,9 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package codex.fieldchimp;
+package codex.varchimp;
 
-import codex.fieldchimp.gui.VariableContainer;
+import codex.varchimp.gui.VariableContainer;
 import com.jme3.app.Application;
 import com.jme3.app.state.BaseAppState;
 import com.jme3.math.ColorRGBA;
@@ -16,19 +16,19 @@ import com.simsilica.lemur.event.PopupState;
 import java.util.LinkedList;
 import java.util.logging.Logger;
 import java.util.logging.Level;
-import codex.fieldchimp.gui.VariableContainerFactory;
+import codex.varchimp.gui.VariableContainerFactory;
 
 /**
  *
  * @author gary
  */
-public class FieldChimpAppState extends BaseAppState {
+public class VarChimpAppState extends BaseAppState {
     
     public static final String FIELD_USERDATA = "FieldChimp[field]";
-    private static final Logger LOG = Logger.getLogger(FieldChimpAppState.class.getName());
+    private static final Logger LOG = Logger.getLogger(VarChimpAppState.class.getName());
     
-    LinkedList<Variable> variables = new LinkedList<>();
-    LinkedList<Variable> preInitVars = new LinkedList<>();
+    LinkedList<VariablePointer> variables = new LinkedList<>();
+    LinkedList<VariablePointer> preInitVars = new LinkedList<>();
     LinkedList<VariableContainer> containers = new LinkedList<>();
     LinkedList<VariableContainerFactory> factories = new LinkedList<>();
     Container gui = new Container();
@@ -38,7 +38,7 @@ public class FieldChimpAppState extends BaseAppState {
     boolean cursorLocked = false;
     boolean popupOpen = false;
     
-    public FieldChimpAppState() {
+    public VarChimpAppState() {
         setEnabled(false);
     }
     
@@ -52,7 +52,7 @@ public class FieldChimpAppState extends BaseAppState {
         gui.setLocalTranslation(0f, windowSize.y, 0f);
         varList.setLayout(new BoxLayout());
         
-        for (Variable f : preInitVars) {
+        for (VariablePointer f : preInitVars) {
             initField(f);
         }
         preInitVars.clear();
@@ -80,7 +80,7 @@ public class FieldChimpAppState extends BaseAppState {
     @Override
     public void update(float tpf) {}
     
-    private void initField(Variable field) {
+    private void initField(VariablePointer field) {
         VariableContainerFactory factory = getFactory(field);
         if (factory == null) {
             LOG.log(Level.WARNING, "Field has no corresponding factory!");
@@ -91,10 +91,9 @@ public class FieldChimpAppState extends BaseAppState {
         containers.add(container);
         container.initialize();
         varList.addChild(container);
-        container.pullFieldValue();
         container.getReference().update();
     }
-    private VariableContainerFactory getFactory(Variable field) {
+    private VariableContainerFactory getFactory(VariablePointer field) {
         for (VariableContainerFactory f : factories) {
             if (f.accept(field)) {
                 return f;
@@ -122,30 +121,29 @@ public class FieldChimpAppState extends BaseAppState {
     }
     
     public void pushChanges() {
-        containers.stream().filter(f -> f.getReference().needsUpdate()).forEach(f -> {
+        containers.stream().filter(f -> f.getReference().update()).forEach(f -> {
             f.pushFieldValue();
-            f.getReference().update();
         });
     }
     public void pullChanges() {
-        containers.stream().filter(f -> f.getVariable().fieldChanged()).forEach(f -> {
+        containers.stream().forEach(f -> {
             f.pullFieldValue();
             f.getReference().update();
         });
     }
     
-    public void register(Variable field) {
+    public void register(VariablePointer field) {
         if (!variables.contains(field)) {
             if (isInitialized()) initField(field);
             else preInitVars.add(field);
         }
     }
-    public void registerAll(Variable... fields) {
-        for (Variable f : fields) {
+    public void registerAll(VariablePointer... fields) {
+        for (VariablePointer f : fields) {
             register(f);
         }
     }
-    public boolean remove(Variable field) {
+    public boolean remove(VariablePointer field) {
         return variables.remove(field);
     }
     public void clear() {

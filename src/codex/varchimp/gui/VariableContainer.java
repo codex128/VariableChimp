@@ -2,7 +2,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package codex.fieldchimp.gui;
+package codex.varchimp.gui;
 
 import com.simsilica.lemur.Axis;
 import com.simsilica.lemur.Button;
@@ -12,7 +12,7 @@ import com.simsilica.lemur.FillMode;
 import com.simsilica.lemur.Label;
 import com.simsilica.lemur.component.BoxLayout;
 import com.simsilica.lemur.core.VersionedReference;
-import codex.fieldchimp.Variable;
+import codex.varchimp.VariablePointer;
 
 /**
  *
@@ -21,12 +21,12 @@ import codex.fieldchimp.Variable;
  */
 public abstract class VariableContainer <T> extends Container implements VariableContainerFactory {
     
-    protected final Variable<T> variable;
+    protected final VariablePointer<T> variable;
     protected Container editContainer, buttonContainer;
     protected VersionedReference reference;
     private boolean initialized = false;
     
-    public VariableContainer(Variable<T> variable) {
+    public VariableContainer(VariablePointer<T> variable) {
         this.variable = variable;
     }
     
@@ -49,12 +49,15 @@ public abstract class VariableContainer <T> extends Container implements Variabl
      * Initializes Lemur gui.
      */
     public void initialize() {
-        addChild(new Label(variable.getFieldLabel()));
+        addChild(new Label(variable.getVariableLabel()));
         editContainer = addChild(new Container());
         buttonContainer = addChild(new Container());
         buttonContainer.setLayout(new BoxLayout(Axis.X, FillMode.Even));
         initButtons();
         initEditingGui();
+        if (reference == null) {
+            throw new NullPointerException("Versioned reference was not initialized, please initialize reference during initialization.");
+        }
         initialized = true;
         pullFieldValue();
     }
@@ -70,17 +73,21 @@ public abstract class VariableContainer <T> extends Container implements Variabl
      */
     public void pullFieldValue() {
         if (!isInitialized()) return;
-        pull(variable.getFieldValue());
+        pull(variable.getVariableValue());
     }
     /**
      * Pushes the gui value to the variable value (similar to git's push command).
      */
     public void pushFieldValue() {
         if (!isInitialized()) return;
-        variable.setFieldValue(push());
+        variable.setVariableValue(push());
     }
     
-    public Variable<T> getVariable() {
+    protected void setReference(VersionedReference ref) {
+        reference = ref;
+    }
+    
+    public VariablePointer<T> getVariable() {
         return variable;
     }
     public VersionedReference getReference() {

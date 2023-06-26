@@ -2,22 +2,23 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package codex.fieldchimp;
+package codex.varchimp;
 
 /**
  *
  * @author gary
  * @param <T>
  */
-public abstract class AbstractVariable <T> implements Variable<T> {
+public class Variable <T> implements VariablePointer<T> {
     
     private final Object subject;
+    private final Class<T> type;
     private final Pull<T> getter;
     private final Push<T> setter;
-    private T lastAccessValue;
     
-    public AbstractVariable(Object subject, Pull<T> getter, Push<T> setter) {
+    public Variable(Object subject, Class<T> type, Pull<T> getter, Push<T> setter) {
         this.subject = subject;
+        this.type = type;
         this.getter = getter;
         this.setter = setter;
         initialize();
@@ -27,7 +28,11 @@ public abstract class AbstractVariable <T> implements Variable<T> {
         getter.setUser(this);
         setter.setUser(this);
     }
-    
+        
+    @Override
+    public Class<T> getVariableType() {
+        return type;
+    }
     @Override
     public Object getSubject() {
         return subject;
@@ -39,14 +44,6 @@ public abstract class AbstractVariable <T> implements Variable<T> {
     @Override
     public Push<T> getPusher() {
         return setter;
-    }
-    @Override
-    public void setLastAccessValue(T value) {
-        lastAccessValue = value;
-    }
-    @Override
-    public T getLastAccessValue() {
-        return lastAccessValue;
     }
     @Override
     public String toString() {

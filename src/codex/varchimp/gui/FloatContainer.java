@@ -2,10 +2,10 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package codex.fieldchimp.gui;
+package codex.varchimp.gui;
 
 import com.simsilica.lemur.DefaultRangedValueModel;
-import codex.fieldchimp.Variable;
+import codex.varchimp.VariablePointer;
 
 /**
  *
@@ -15,7 +15,7 @@ public class FloatContainer extends VariableContainer<Float> {
     
     NumberScroller scroller;
     
-    public FloatContainer(Variable field) {
+    public FloatContainer(VariablePointer<Float> field) {
         super(field);
     }
     
@@ -38,8 +38,8 @@ public class FloatContainer extends VariableContainer<Float> {
         return float.class;
     }
     @Override
-    public VariableContainer create(Variable field) {
-        return new FloatContainer(field);
+    public VariableContainer create(VariablePointer variable) {
+        return new FloatContainer(variable);
     }
     
 }

@@ -2,13 +2,12 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package codex.fctests;
+package codex.vctests;
 
-import codex.fieldchimp.FieldChimpAppState;
-import codex.fieldchimp.NumberVar;
-import codex.fieldchimp.Pull;
-import codex.fieldchimp.Push;
-import codex.fieldchimp.gui.FloatContainer;
+import codex.varchimp.Pull;
+import codex.varchimp.Push;
+import codex.varchimp.VarChimp;
+import codex.varchimp.Variable;
 import com.jme3.app.SimpleApplication;
 import com.jme3.input.KeyInput;
 import com.jme3.input.controls.ActionListener;
@@ -28,7 +27,6 @@ import com.simsilica.lemur.style.BaseStyles;
  */
 public class TestGame extends SimpleApplication implements ActionListener {
     
-    FieldChimpAppState fieldChimp;
     Spatial bird;
     float velocity = 0f;
     float jumpForce = 1f;
@@ -45,27 +43,24 @@ public class TestGame extends SimpleApplication implements ActionListener {
         BaseStyles.loadGlassStyle();
         GuiGlobals.getInstance().getStyles().setDefaultStyle("glass");
         
-        fieldChimp = new FieldChimpAppState();
-        fieldChimp.registerAllFactories(new FloatContainer(null));
-        stateManager.attach(fieldChimp);
-        //fieldChimp.setEnabled(true);
+        VarChimp.initialize(this);
         
         bird = new Geometry("bird", new Box(1f, 1f, 1f));
         bird.setMaterial(createMaterial(ColorRGBA.Blue));
         rootNode.attachChild(bird);
         
         inputManager.addMapping("jump", new KeyTrigger(KeyInput.KEY_SPACE));
-        inputManager.addMapping("start-fieldchimp", new KeyTrigger(KeyInput.KEY_F));
-        inputManager.addListener(this, "jump", "start-fieldchimp");
+        inputManager.addMapping("start-varchimp", new KeyTrigger(KeyInput.KEY_F));
+        inputManager.addListener(this, "jump", "start-varchimp");
         
-        fieldChimp.register(new NumberVar(this, float.class, new Pull("getX"), new Push("setX")));
-        fieldChimp.register(new NumberVar(this, float.class, new Pull("getJumpForce"), new Push("setJumpForce")));
+        VarChimp.get().register(new Variable(this, Vector3f.class, new Pull("getPosition"), new Push("setPosition")));
+        //VarChimp.get().register(new Variable(this, float.class, new Pull("getJumpForce"), new Push("setJumpForce")));
         
     }
     @Override
     public void simpleUpdate(float tpf) {
         cam.lookAt(bird.getWorldTranslation(), Vector3f.UNIT_Y);
-        if (!fieldChimp.isEnabled()) {
+        if (!VarChimp.get().isEnabled()) {
             velocity -= gravity;
             bird.move(0f, velocity, 0f);
         }
@@ -74,8 +69,8 @@ public class TestGame extends SimpleApplication implements ActionListener {
     public void onAction(String name, boolean isPressed, float tpf) {
         if (!isPressed) return;
         if (name.equals("jump")) velocity = jumpForce;
-        else if (name.equals("start-fieldchimp")) {
-            fieldChimp.setEnabled(!fieldChimp.isEnabled());
+        else if (name.equals("start-varchimp")) {
+            VarChimp.get().setEnabled(!VarChimp.get().isEnabled());
         }
     }
     
@@ -85,13 +80,11 @@ public class TestGame extends SimpleApplication implements ActionListener {
         return m;
     }
 
-    public float getX() {
-        return bird.getLocalTranslation().x;
+    public Vector3f getPosition() {
+        return bird.getLocalTranslation();
     }
-    public void setX(float x) {
-        Vector3f v = bird.getLocalTranslation();
-        v.setX(x);
-        bird.setLocalTranslation(v);
+    public void setPosition(Vector3f vec) {
+        bird.setLocalTranslation(vec);
     }
     public float getVelocity() {
         return velocity;
