@@ -16,6 +16,7 @@ Its arguments are as follows:
 * The type of the field you want to change (we used double.class).
 * The puller (updates the gui to reflect the field).
 * The pusher (updates the field to reflect the gui).
+
 The argument passed into Pull and Push is the same as a getter/setter pair that myObject should have.
 When you update the gui or field using Pull or Push, they will use the method corresponding to the string you gave them.
 
