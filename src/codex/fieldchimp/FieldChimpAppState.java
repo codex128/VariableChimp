@@ -4,11 +4,16 @@
  */
 package codex.fieldchimp;
 
+import codex.fieldchimp.gui.FieldContainerFactory;
+import codex.fieldchimp.gui.FieldContainer;
 import com.jme3.app.Application;
 import com.jme3.app.state.BaseAppState;
-import com.jme3.renderer.ViewPort;
-import com.jme3.scene.Node;
-import com.simsilica.lemur.core.VersionedList;
+import com.jme3.math.ColorRGBA;
+import com.jme3.math.Vector2f;
+import com.simsilica.lemur.Container;
+import com.simsilica.lemur.GuiGlobals;
+import com.simsilica.lemur.component.BoxLayout;
+import com.simsilica.lemur.event.PopupState;
 import java.util.LinkedList;
 import java.util.logging.Logger;
 import java.util.logging.Level;
@@ -22,16 +27,37 @@ public class FieldChimpAppState extends BaseAppState {
     public static final String FIELD_USERDATA = "FieldChimp[field]";
     private static final Logger LOG = Logger.getLogger(FieldChimpAppState.class.getName());
     
-    VersionedList<Field> fields = new VersionedList<>();
+    LinkedList<Field> fields = new LinkedList<>();
+    LinkedList<Field> preInitFields = new LinkedList<>();
     LinkedList<FieldContainer> containers = new LinkedList<>();
     LinkedList<FieldContainerFactory> factories = new LinkedList<>();
-    ViewPort vp;
-    Node gui = new Node();
+    Container gui = new Container();
+    Container fieldList = new Container();
+    Vector2f windowSize;
+    ColorRGBA background = new ColorRGBA(0f, 0f, 0f, .7f);
+    boolean cursorLocked = false;
+    boolean popupOpen = false;
     
-    public FieldChimpAppState() {}
+    public FieldChimpAppState() {
+        setEnabled(false);
+    }
     
     @Override
-    protected void initialize(Application app) {}
+    protected void initialize(Application app) {
+        
+        windowSize = new Vector2f(app.getContext().getSettings().getWidth(),
+                app.getContext().getSettings().getHeight());
+        
+        gui.addChild(fieldList);
+        gui.setLocalTranslation(0f, windowSize.y, 0f);
+        fieldList.setLayout(new BoxLayout());
+        
+        for (Field f : preInitFields) {
+            initField(f);
+        }
+        preInitFields.clear();
+        
+    }
     @Override
     protected void cleanup(Application app) {
         clear();
@@ -40,25 +66,19 @@ public class FieldChimpAppState extends BaseAppState {
     }
     @Override
     protected void onEnable() {
-        if (vp != null) {
-            vp.attachScene(gui);
-        }
+        openPopup();
         pullChanges();
+        cursorLocked = !GuiGlobals.getInstance().isCursorEventsEnabled();
+        GuiGlobals.getInstance().setCursorEventsEnabled(true);
     }
     @Override
     protected void onDisable() {
         pushChanges();
-        if (vp != null) {
-            vp.detachScene(gui);
-        }
+        closePopup();
+        GuiGlobals.getInstance().setCursorEventsEnabled(!cursorLocked);
     }
     @Override
-    public void update(float tpf) {
-        if (vp != null) {
-            gui.updateLogicalState(tpf);
-            gui.updateGeometricState();
-        }
-    }
+    public void update(float tpf) {}
     
     private void initField(Field field) {
         FieldContainerFactory factory = getFactory(field);
@@ -69,7 +89,9 @@ public class FieldChimpAppState extends BaseAppState {
         fields.add(field);
         FieldContainer container = factory.create(field);
         containers.add(container);
-        gui.attachChild(container);
+        container.initialize();
+        fieldList.addChild(container);
+        container.pullFieldValue();
         container.getReference().update();
     }
     private FieldContainerFactory getFactory(Field field) {
@@ -79,6 +101,23 @@ public class FieldChimpAppState extends BaseAppState {
             }
         }
         return null;
+    }
+    
+    private void openPopup() {
+        if (popupOpen) return;
+        getState(PopupState.class).showModalPopup(gui, (PopupState source) -> {
+            setPopupAsClosed();
+            setEnabled(false);
+        }, background);
+    }
+    private void closePopup() {
+        if (popupOpen) {
+            getState(PopupState.class).closePopup(gui);
+            setPopupAsClosed();
+        }
+    }
+    private void setPopupAsClosed() {
+        popupOpen = false;
     }
     
     public void pushChanges() {
@@ -96,7 +135,8 @@ public class FieldChimpAppState extends BaseAppState {
     
     public void register(Field field) {
         if (!fields.contains(field)) {
-            initField(field);
+            if (isInitialized()) initField(field);
+            else preInitFields.add(field);
         }
     }
     public void registerAll(Field... fields) {
@@ -118,16 +158,6 @@ public class FieldChimpAppState extends BaseAppState {
         for (FieldContainerFactory f : factories) {
             registerFactory(f);
         }
-    }
-    
-    public void setViewPort(ViewPort vp) {
-        if (isEnabled()) {
-            if (this.vp != null) {
-                this.vp.detachScene(gui);
-            }
-            vp.attachScene(gui);
-        }
-        this.vp = vp;
     }
     
 }

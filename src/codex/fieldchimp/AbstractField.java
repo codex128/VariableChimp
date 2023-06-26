@@ -7,19 +7,25 @@ package codex.fieldchimp;
 /**
  *
  * @author gary
+ * @param <T>
  */
-public abstract class AbstractGetterSetter <T> implements Field<T> {
+public abstract class AbstractField <T> implements Field<T> {
     
     private final Object subject;
-    private final String getter, setter;
-    private final FieldId id = new FieldId();
+    private final Pull<T> getter;
+    private final Push<T> setter;
     private T lastAccessValue;
     
-    public AbstractGetterSetter(Object subject, String getter, String setter) {
+    public AbstractField(Object subject, Pull<T> getter, Push<T> setter) {
         this.subject = subject;
         this.getter = getter;
         this.setter = setter;
-        lastAccessValue = getFieldValue();
+        initialize();
+    }
+    
+    private void initialize() {        
+        getter.setField(this);
+        setter.setField(this);
     }
     
     @Override
@@ -27,11 +33,11 @@ public abstract class AbstractGetterSetter <T> implements Field<T> {
         return subject;
     }
     @Override
-    public String getFieldGetterName() {
+    public Pull<T> getPuller() {
         return getter;
     }
     @Override
-    public String getFieldSetterName() {
+    public Push<T> getPusher() {
         return setter;
     }
     @Override
@@ -43,12 +49,8 @@ public abstract class AbstractGetterSetter <T> implements Field<T> {
         return lastAccessValue;
     }
     @Override
-    public FieldId getId() {
-        return id;
-    }
-    @Override
     public String toString() {
-        return getFieldSetterName();
+        return getClass().getSimpleName()+"["+getPusher().getSetterName()+"]";
     }
     
 }
