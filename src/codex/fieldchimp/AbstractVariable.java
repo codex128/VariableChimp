@@ -9,14 +9,14 @@ package codex.fieldchimp;
  * @author gary
  * @param <T>
  */
-public abstract class AbstractField <T> implements Field<T> {
+public abstract class AbstractVariable <T> implements Variable<T> {
     
     private final Object subject;
     private final Pull<T> getter;
     private final Push<T> setter;
     private T lastAccessValue;
     
-    public AbstractField(Object subject, Pull<T> getter, Push<T> setter) {
+    public AbstractVariable(Object subject, Pull<T> getter, Push<T> setter) {
         this.subject = subject;
         this.getter = getter;
         this.setter = setter;
@@ -24,8 +24,8 @@ public abstract class AbstractField <T> implements Field<T> {
     }
     
     private void initialize() {        
-        getter.setField(this);
-        setter.setField(this);
+        getter.setUser(this);
+        setter.setUser(this);
     }
     
     @Override

@@ -4,7 +4,7 @@
  */
 package codex.fieldchimp;
 
-import static codex.fieldchimp.Field.LOG;
+import static codex.fieldchimp.Variable.LOG;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.logging.Level;
@@ -16,21 +16,21 @@ import java.util.logging.Level;
  */
 public class Push <T> {
     
-    private Field<T> field;
+    private Variable<T> user;
     private String setter;
     
     public Push(String setter) {
         this.setter = setter;
     }
     
-    protected void setField(Field<T> field) {
-        this.field = field;
+    protected void setUser(Variable<T> user) {
+        this.user = user;
     }
     public void push(T value) {
-        if (field == null) return;
+        if (user == null) return;
         try {
-            Method method = field.getSubject().getClass().getMethod(setter, field.getFieldType());
-            method.invoke(field.getSubject(), value);
+            Method method = user.getSubject().getClass().getMethod(setter, user.getFieldType());
+            method.invoke(user.getSubject(), value);
         } catch (NoSuchMethodException ex) {
             LOG.log(Level.SEVERE, "Setter method does not exist!", ex);
         } catch(SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
@@ -38,8 +38,8 @@ public class Push <T> {
         }
     }
     
-    public Field<T> getField() {
-        return field;
+    public Variable<T> getUser() {
+        return user;
     }
     public String getSetterName() {
         return setter;

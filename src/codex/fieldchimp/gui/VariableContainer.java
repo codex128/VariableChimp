@@ -4,7 +4,6 @@
  */
 package codex.fieldchimp.gui;
 
-import codex.fieldchimp.Field;
 import com.simsilica.lemur.Axis;
 import com.simsilica.lemur.Button;
 import com.simsilica.lemur.Command;
@@ -13,25 +12,26 @@ import com.simsilica.lemur.FillMode;
 import com.simsilica.lemur.Label;
 import com.simsilica.lemur.component.BoxLayout;
 import com.simsilica.lemur.core.VersionedReference;
+import codex.fieldchimp.Variable;
 
 /**
  *
  * @author gary
  * @param <T>
  */
-public abstract class FieldContainer <T> extends Container implements FieldContainerFactory {
+public abstract class VariableContainer <T> extends Container implements VariableContainerFactory {
     
-    protected final Field<T> field;
+    protected final Variable<T> variable;
     protected Container editContainer, buttonContainer;
     protected VersionedReference reference;
     private boolean initialized = false;
     
-    public FieldContainer(Field<T> field) {
-        this.field = field;
+    public VariableContainer(Variable<T> variable) {
+        this.variable = variable;
     }
     
     /**
-     * Initializes the Lemur gui used to edit the field.
+     * Initializes the Lemur gui used to edit the variable.
      */
     protected abstract void initEditingGui();
     /**
@@ -49,7 +49,7 @@ public abstract class FieldContainer <T> extends Container implements FieldConta
      * Initializes Lemur gui.
      */
     public void initialize() {
-        addChild(new Label(field.getFieldLabel()));
+        addChild(new Label(variable.getFieldLabel()));
         editContainer = addChild(new Container());
         buttonContainer = addChild(new Container());
         buttonContainer.setLayout(new BoxLayout(Axis.X, FillMode.Even));
@@ -66,22 +66,22 @@ public abstract class FieldContainer <T> extends Container implements FieldConta
     }
     
     /**
-     * Pulls the field value to the gui value (similar to git's pull command).
+     * Pulls the variable value to the gui value (similar to git's pull command).
      */
     public void pullFieldValue() {
         if (!isInitialized()) return;
-        pull(field.getFieldValue());
+        pull(variable.getFieldValue());
     }
     /**
-     * Pushes the gui value to the field value (similar to git's push command).
+     * Pushes the gui value to the variable value (similar to git's push command).
      */
     public void pushFieldValue() {
         if (!isInitialized()) return;
-        field.setFieldValue(push());
+        variable.setFieldValue(push());
     }
     
-    public Field<T> getField() {
-        return field;
+    public Variable<T> getVariable() {
+        return variable;
     }
     public VersionedReference getReference() {
         return reference;

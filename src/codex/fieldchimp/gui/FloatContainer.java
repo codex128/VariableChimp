@@ -4,18 +4,18 @@
  */
 package codex.fieldchimp.gui;
 
-import codex.fieldchimp.Field;
 import com.simsilica.lemur.DefaultRangedValueModel;
+import codex.fieldchimp.Variable;
 
 /**
  *
  * @author gary
  */
-public class FloatContainer extends FieldContainer<Float> {
+public class FloatContainer extends VariableContainer<Float> {
     
     NumberScroller scroller;
     
-    public FloatContainer(Field field) {
+    public FloatContainer(Variable field) {
         super(field);
     }
     
@@ -34,11 +34,11 @@ public class FloatContainer extends FieldContainer<Float> {
         return (float)scroller.getModel().getValue();
     }
     @Override
-    public Class<Float> getFieldType() {
+    public Class<Float> getVariableType() {
         return float.class;
     }
     @Override
-    public FieldContainer create(Field field) {
+    public VariableContainer create(Variable field) {
         return new FloatContainer(field);
     }
     

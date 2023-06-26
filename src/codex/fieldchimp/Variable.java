@@ -11,9 +11,9 @@ import java.util.logging.Logger;
  * @author gary
  * @param <T>
  */
-public interface Field <T> {
+public interface Variable <T> {
     
-    public static final Logger LOG = Logger.getLogger(Field.class.getName());
+    public static final Logger LOG = Logger.getLogger(Variable.class.getName());
     
     public Class<T> getFieldType();
     public Object getSubject();

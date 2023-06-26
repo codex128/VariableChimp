@@ -4,7 +4,7 @@
  */
 package codex.fieldchimp;
 
-import static codex.fieldchimp.Field.LOG;
+import static codex.fieldchimp.Variable.LOG;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.logging.Level;
@@ -16,22 +16,23 @@ import java.util.logging.Level;
  */
 public class Pull <T> {
     
-    private Field<T> field;
+    private Variable<T> user;
     private String getter;
     
     public Pull(String getter) {
         this.getter = getter;
     }
     
-    protected void setField(Field<T> field) {
-        this.field = field;
+    protected void setUser(Variable<T> user) {
+        this.user = user;
     }
+    
     public T pull() {
-        if (field == null) return null;
+        if (user == null) return null;
         try {
-            Method method = field.getSubject().getClass().getMethod(getter);
-            if (field.getFieldType().isAssignableFrom(method.getReturnType())) {
-                T value = (T)method.invoke(field.getSubject());
+            Method method = user.getSubject().getClass().getMethod(getter);
+            if (user.getFieldType().isAssignableFrom(method.getReturnType())) {
+                T value = (T)method.invoke(user.getSubject());
                 //if (!sneaky) setLastAccessValue(value);
                 return value;
             }
@@ -46,8 +47,8 @@ public class Pull <T> {
         return null;
     }
     
-    public Field<T> getField() {
-        return field;
+    public Variable<T> getUser() {
+        return user;
     }
     public String getGetterName() {
         return getter;

@@ -5,7 +5,7 @@
 package codex.fctests;
 
 import codex.fieldchimp.FieldChimpAppState;
-import codex.fieldchimp.NumberField;
+import codex.fieldchimp.NumberVar;
 import codex.fieldchimp.Pull;
 import codex.fieldchimp.Push;
 import codex.fieldchimp.gui.FloatContainer;
@@ -58,7 +58,8 @@ public class TestGame extends SimpleApplication implements ActionListener {
         inputManager.addMapping("start-fieldchimp", new KeyTrigger(KeyInput.KEY_F));
         inputManager.addListener(this, "jump", "start-fieldchimp");
         
-        fieldChimp.register(new NumberField(this, float.class, new Pull("getJumpForce"), new Push("setJumpForce")));
+        fieldChimp.register(new NumberVar(this, float.class, new Pull("getX"), new Push("setX")));
+        fieldChimp.register(new NumberVar(this, float.class, new Pull("getJumpForce"), new Push("setJumpForce")));
         
     }
     @Override
@@ -84,6 +85,14 @@ public class TestGame extends SimpleApplication implements ActionListener {
         return m;
     }
 
+    public float getX() {
+        return bird.getLocalTranslation().x;
+    }
+    public void setX(float x) {
+        Vector3f v = bird.getLocalTranslation();
+        v.setX(x);
+        bird.setLocalTranslation(v);
+    }
     public float getVelocity() {
         return velocity;
     }
