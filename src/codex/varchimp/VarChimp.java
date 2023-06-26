@@ -7,7 +7,8 @@ package codex.varchimp;
 import com.jme3.app.Application;
 
 /**
- *
+ * Main access class for VariableChimp.
+ * 
  * @author gary
  */
 public class VarChimp {
@@ -25,8 +26,13 @@ public class VarChimp {
         initializer.initialize(app, instance);
         app.getStateManager().attach(instance);
     }
+    
     public static VarChimpAppState get() {
         return instance;
+    }
+    public static boolean flip() {
+        instance.setEnabled(!instance.isEnabled());
+        return instance.isEnabled();
     }
     
 }

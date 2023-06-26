@@ -60,10 +60,10 @@ public class TestGame extends SimpleApplication implements ActionListener {
     @Override
     public void simpleUpdate(float tpf) {
         cam.lookAt(bird.getWorldTranslation(), Vector3f.UNIT_Y);
-//        if (!VarChimp.get().isEnabled()) {
+        if (!VarChimp.get().isEnabled()) {
             velocity -= gravity;
             bird.move(0f, velocity, 0f);
-//        }
+        }
     }
     @Override
     public void onAction(String name, boolean isPressed, float tpf) {

@@ -4,8 +4,10 @@
  */
 package codex.varchimp;
 
+import codex.varchimp.gui.DoubleContainer;
 import codex.varchimp.gui.FloatContainer;
 import codex.varchimp.gui.IntegerContainer;
+import codex.varchimp.gui.VariableContainerFactory;
 import codex.varchimp.gui.Vector3fContainer;
 import com.jme3.app.Application;
 
@@ -15,12 +17,17 @@ import com.jme3.app.Application;
  */
 public interface VarChimpInitializer {
     
+    public static final VariableContainerFactory[]
+    DEF_FACTORIES = {
+        new FloatContainer(null),
+        new IntegerContainer(null),
+        new DoubleContainer(null),
+        new Vector3fContainer(null)
+    };
+    
     public static final VarChimpInitializer
     DEFAULT = (Application app, VarChimpAppState state) -> {
-        state.registerAllFactories(
-                new FloatContainer(null),
-                new IntegerContainer(null),
-                new Vector3fContainer(null));
+        state.registerAllFactories(DEF_FACTORIES);
     };
     
     public void initialize(Application app, VarChimpAppState state);
