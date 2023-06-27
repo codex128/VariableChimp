@@ -31,7 +31,12 @@ Pushing is exactly the opposite of pulling. Instead of applying the field to the
 Normally, `Push` and `Pull` access getters and setters in order to change fields. However, `FieldPull` and `FieldPush` directly access the field of the subject. They each require one string, which should be the exact name of the field.
 
 ### Additional, Faster `Var` Constructors
-
+```
+// edits field through getter and setter
+new Var(myObject, int.class, "getNumber", "setNumber");
+// directly accesses field "num" on both pushes and pulls 
+new Var(myObject, int.class, "num");
+```
 
 # More Advanced Usage
 
