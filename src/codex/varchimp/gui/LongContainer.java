@@ -24,6 +24,7 @@ public class LongContainer extends VariableContainer<Long> {
         scroller = editContainer.addChild(new NumberScroller());
         scroller.setModel(VariableContainer.createDefaultModel(Long.class));
         scroller.setValueDisplay((RangedValueModel model) -> ""+(long)model.getValue());
+        setReference(scroller.getModel().createReference());
     }
     @Override
     protected void pull(Long value) {

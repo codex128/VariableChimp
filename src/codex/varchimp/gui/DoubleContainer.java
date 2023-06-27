@@ -22,6 +22,7 @@ public class DoubleContainer extends VariableContainer<Double> {
     protected void initEditingGui() {
         scroller = editContainer.addChild(new NumberScroller());
         scroller.setModel(VariableContainer.createDefaultModel(Double.class));
+        scroller.setValueDisplay(new LimitedValueDisplay());
         setReference(scroller.getModel().createReference());
     }
     @Override

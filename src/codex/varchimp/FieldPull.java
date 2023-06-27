@@ -26,7 +26,7 @@ public class FieldPull <T> extends Pull<T> {
         super.setUser(user);
         if (this.user != null) {
             try {
-                field = this.user.getSubject().getClass().getField(getter);
+                field = this.user.getSubject().getClass().getDeclaredField(getter);
                 if (!field.getType().isAssignableFrom(user.getVariableType())) {
                     throw new IllegalArgumentException("Field type does not match variable type!");
                 }
