@@ -66,7 +66,7 @@ public class MyCustomContainer extends VariableContainer<Double> {
     @Override
     public VariableContainer create(VariablePointer variable) {
         // Creates a new MyCustomContainer.
-        // This is an implementation 
+        // This is an implementation from
         return new MyCustomContainer(variable);
     }    
 }
