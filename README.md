@@ -40,7 +40,7 @@ To apply those variables to `myObject`:
 ```
 VarChimp.get().applyCache("my-variable-group", myObject);
 ```
-Applying variables actually creates copies of them and deletes (by default) the old ones.
+Applying variables actually creates new copies and deletes (by default) the old variables.
 
 # Dependencies
 * [JMonkeyEngine 3.6+](https://github.com/jMonkeyEngine/jmonkeyengine) (probably works for earlier versions such as 3.5 as well)
