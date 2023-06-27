@@ -6,15 +6,19 @@ First, initialize VariableChimp using the `VarChimp` class.
 ```
 VarChimp.initialize(application);
 ```
-Then, register a Variable for changes. This code registers a Variable which is used to change the location of a Node.
-![code-snippet](https://github.com/codex128/VariableChimp/blob/master/assets/Textures/code-snippet.png?raw=true)
+Then, register a Variable for changes. This code registers a `Var` (class implementation of Variable) which is used to track the local translation of a spatial.
+```
+Spatial mySpatial = new Node("my-spatial");
+Variable v = new Var(mySpatial, Vector3f.class, new Pull("getLocalTranslation"), new Push("setLocalTranslation"));
+VarChimp.get().register(v);
+```
 
-**What do each of these do?**
-* `Variable` makes sure the corresponding GUI and field match (when requested). It is really the heart of the library.
-* The first argument to Variable is the object which stores the field we want to edit. This is known as the *subject*.
-* The second argument to Variable indicates what data type we're working with. In this case it's Vector3f.
-* The third argument to Variable is the class which will handle *pulling*.
-* The fourth argument to Variable is the class which will handle *pushing*.
+
+**What do each of these arguments do?**
+* The Variable interface (in this case as `Var`) makes sure the corresponding GUI and field match (when requested). It is really the heart of the library.
+* The first argument to `Var` is the object which stores the field we want to edit. This is known as the *subject*.
+* The second argument to `Var` indicates what data type we're working with. In this case it's Vector3f.
+* The third and fourth 
 
 **What is pulling?**
 Pulling, like the git command, is applying the field value to the GUI, so that the GUI displays whatever the field is. In VariableChimp, the `Pull` class handles the pulling; it takes one argument, a string, which indicates a getter method belonging to the subject that returns the field we want to edit.
