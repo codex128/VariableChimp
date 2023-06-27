@@ -13,7 +13,7 @@ Variable v = new Var(mySpatial, Vector3f.class, new Pull("getLocalTranslation"),
 VarChimp.get().register(v);
 ```
 
-### What is `Variable` and `Var`?
+### What are `Variable` and `Var`?
 `Variable` is an interface for tracking and updating a field. `Var` is the class implementation of `Variable`.
 
 ### What do each of these arguments do?
@@ -26,6 +26,9 @@ Pulling, like the git command, is applying the field value to the GUI, so that t
 
 ### What is pushing?
 Pushing is exactly the opposite of pulling. Instead of applying the field to the GUI, we apply the GUI to the field (so that the field is whatever the GUI displays). The `Push` class handles pushing; it takes one argument, a string, which indicates a setter method belonging to the subject that sets the field we want to edit.
+
+### Direct Field Access
+Normally, `Push` and `Pull` access getters and setters in order to change fields. However, `FieldPull` and `FieldPush` directly access the field of the subject.
 
 # More Advanced Usage
 
