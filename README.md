@@ -6,30 +6,31 @@ First, initialize VariableChimp using the `VarChimp` class.
 ```
 VarChimp.initialize(application);
 ```
-Then, register a Variable for changes. This code registers a `Var` (class implementation of Variable) which is used to track the local translation of a spatial.
+Then, register a Variable for changes. This code registers a `Var` which is used to track the local translation of a spatial.
 ```
 Spatial mySpatial = new Node("my-spatial");
 Variable v = new Var(mySpatial, Vector3f.class, new Pull("getLocalTranslation"), new Push("setLocalTranslation"));
 VarChimp.get().register(v);
 ```
 
+### What is `Variable` and `Var`?
+`Variable` is an interface for tracking and updating a field. `Var` is the class implementation of `Variable`.
 
-**What do each of these arguments do?**
-* The Variable interface (in this case as `Var`) makes sure the corresponding GUI and field match (when requested). It is really the heart of the library.
-* The first argument to `Var` is the object which stores the field we want to edit. This is known as the *subject*.
-* The second argument to `Var` indicates what data type we're working with. In this case it's Vector3f.
-* The third and fourth 
+### What do each of these arguments do?
+* The first argument is the object which stores the field we want to edit. This is known as the *subject*.
+* The second argument indicates what data type we're working with. In this case it's Vector3f.
+* The third and fourth arguments take Push/Pull objects which handle any pushing and pulling that will occur.
 
-**What is pulling?**
+### What is pulling?
 Pulling, like the git command, is applying the field value to the GUI, so that the GUI displays whatever the field is. In VariableChimp, the `Pull` class handles the pulling; it takes one argument, a string, which indicates a getter method belonging to the subject that returns the field we want to edit.
 
-**What is pushing?**
+### What is pushing?
 Pushing is exactly the opposite of pulling. Instead of applying the field to the GUI, we apply the GUI to the field (so that the field is whatever the GUI displays). The `Push` class handles pushing; it takes one argument, a string, which indicates a setter method belonging to the subject that sets the field we want to edit.
 
 # Customization
 VariableChimp is designed to meet your needs, whatever they are. It is designed to support (with some effort) any data type imaginable.
 
-**Creating Custom Variable GUI**
+### Creating Custom Variable GUI
 Any class that wants to display GUI for a variable type must extend `VariableContainer`.
 ```
 public class MyCustomContainer extends VariableContainer<Double> {
@@ -64,8 +65,8 @@ public class MyCustomContainer extends VariableContainer<Double> {
     }
     @Override
     public VariableContainer create(VariablePointer variable) {
-        // creates a new MyCustomContainer
-        // this
+        // Creates a new MyCustomContainer.
+        // This is an implementation 
         return new MyCustomContainer(variable);
     }    
 }
