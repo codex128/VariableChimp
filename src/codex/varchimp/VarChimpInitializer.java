@@ -7,6 +7,8 @@ package codex.varchimp;
 import codex.varchimp.gui.DoubleContainer;
 import codex.varchimp.gui.FloatContainer;
 import codex.varchimp.gui.IntegerContainer;
+import codex.varchimp.gui.LongContainer;
+import codex.varchimp.gui.QuaternionContainer;
 import codex.varchimp.gui.VariableContainerFactory;
 import codex.varchimp.gui.Vector3fContainer;
 import com.jme3.app.Application;
@@ -22,7 +24,9 @@ public interface VarChimpInitializer {
         new FloatContainer(null),
         new IntegerContainer(null),
         new DoubleContainer(null),
-        new Vector3fContainer(null)
+        new LongContainer(null),
+        new Vector3fContainer(null),
+        new QuaternionContainer(null),
     };
     
     public static final VarChimpInitializer
