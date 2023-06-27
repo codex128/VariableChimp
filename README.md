@@ -42,6 +42,13 @@ VarChimp.get().applyCache("my-variable-group", myObject);
 ```
 Applying variables actually creates new copies and deletes (by default) the old variables.
 
+If you'd like to create new variables only if there is no cache to apply:
+```
+VarChimp.get().applyCacheOrElse("my-variable-group", myObject, () -> {
+    VarChimp.get().register(new Var("my-variable-group", myObject, float.class, "myFloat"));
+});
+```
+
 # Dependencies
 * [JMonkeyEngine 3.6+](https://github.com/jMonkeyEngine/jmonkeyengine) (probably works for earlier versions such as 3.5 as well)
 * [Lemur 1.16+](https://github.com/jMonkeyEngine-Contributions/Lemur)
