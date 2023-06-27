@@ -17,6 +17,10 @@ import java.util.logging.Logger;
 import java.util.logging.Level;
 import codex.varchimp.gui.VariableContainerFactory;
 import com.simsilica.lemur.component.SpringGridLayout;
+import com.simsilica.lemur.input.FunctionId;
+import com.simsilica.lemur.input.InputMapper;
+import com.simsilica.lemur.input.InputState;
+import com.simsilica.lemur.input.StateFunctionListener;
 import java.io.File;
 import java.util.function.Function;
 
@@ -24,7 +28,7 @@ import java.util.function.Function;
  *
  * @author gary
  */
-public class VarChimpAppState extends BaseAppState {
+public class VarChimpAppState extends BaseAppState implements StateFunctionListener {
     
     public static final String FIELD_USERDATA = "FieldChimp[field]";
     private static final Logger LOG = Logger.getLogger(VarChimpAppState.class.getName());
@@ -62,17 +66,26 @@ public class VarChimpAppState extends BaseAppState {
         }
         preInitVars.clear();
         
+        InputMapper im = GuiGlobals.getInstance().getInputMapper();
+        im.addStateListener(this, VarChimp.F_OPENWINDOW);
+        im.activateGroup(VarChimp.ACTIVE_INPUT);
+        
     }
     @Override
     protected void cleanup(Application app) {
         clear();
         containers.clear();
         factories.clear();
+        InputMapper im = GuiGlobals.getInstance().getInputMapper();
+        im.removeStateListener(this, VarChimp.F_OPENWINDOW);
+        im.deactivateGroup(VarChimp.ACTIVE_INPUT);
     }
     @Override
     protected void onEnable() {
         openPopup();
         pullChanges();
+        InputMapper im = GuiGlobals.getInstance().getInputMapper();
+        im.activateGroup(VarChimp.PASSIVE_INPUT);
         cursorLocked = !GuiGlobals.getInstance().isCursorEventsEnabled();
         GuiGlobals.getInstance().setCursorEventsEnabled(true);
     }
@@ -80,10 +93,18 @@ public class VarChimpAppState extends BaseAppState {
     protected void onDisable() {
         pushChanges();
         closePopup();
+        InputMapper im = GuiGlobals.getInstance().getInputMapper();
+        im.deactivateGroup(VarChimp.PASSIVE_INPUT);
         GuiGlobals.getInstance().setCursorEventsEnabled(!cursorLocked);
     }
     @Override
     public void update(float tpf) {}
+    @Override
+    public void valueChanged(FunctionId func, InputState value, double tpf) {
+        if (func == VarChimp.F_OPENWINDOW && value != InputState.Off) {
+            setEnabled(!isEnabled());
+        }
+    }
     
     private void initVariable(Variable variable) {
         VariableContainerFactory factory = getFactory(variable);
