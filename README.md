@@ -27,6 +27,11 @@ Pulling, like the git command, is applying the field value to the GUI, so that t
 ### What is pushing?
 Pushing is exactly the opposite of pulling. Instead of applying the field to the GUI, we apply the GUI to the field (so that the field is whatever the GUI displays). The `Push` class handles pushing; it takes one argument, a string, which indicates a setter method belonging to the subject that sets the field we want to edit.
 
+# More Advanced Usage
+
+### Variable Caching
+VariableChimp allows you to temporarily cache variables, then apply them to a different object. This is useful if a state is replaced by another state, but you want to keep the same variables and their values.
+
 # Dependencies
 * [JMonkeyEngine 3.6+](https://github.com/jMonkeyEngine/jmonkeyengine) (probably works for earlier versions such as 3.5 as well)
 * [Lemur 1.16+](https://github.com/jMonkeyEngine-Contributions/Lemur)
