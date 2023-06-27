@@ -32,6 +32,16 @@ Pushing is exactly the opposite of pulling. Instead of applying the field to the
 ### Variable Caching
 VariableChimp allows you to temporarily cache variables, then apply them to a different object. This is useful if a state is replaced by another state, but you want to keep the same variables and their values.
 
+To cache a group:
+```
+VarChimp.get().cacheGroup("my-variable-group");
+```
+To apply those variables to `myObject`:
+```
+VarChimp.get().applyCache("my-variable-group", myObject);
+```
+Applying variables actually creates copies of them and deletes (by default) the old ones.
+
 # Dependencies
 * [JMonkeyEngine 3.6+](https://github.com/jMonkeyEngine/jmonkeyengine) (probably works for earlier versions such as 3.5 as well)
 * [Lemur 1.16+](https://github.com/jMonkeyEngine-Contributions/Lemur)
