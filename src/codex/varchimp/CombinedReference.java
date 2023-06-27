@@ -12,11 +12,11 @@ import com.simsilica.lemur.core.VersionedReference;
  * 
  * @author gary
  */
-public class CombinedVersionedReference extends VersionedReference {
+public class CombinedReference extends VersionedReference {
     
     private final VersionedReference[] refs;
     
-    public CombinedVersionedReference(VersionedReference... refs) {
+    public CombinedReference(VersionedReference... refs) {
         super(new DudVersionedObject());
         this.refs = refs;
     }

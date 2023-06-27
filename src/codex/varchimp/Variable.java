@@ -4,50 +4,76 @@
  */
 package codex.varchimp;
 
+import java.util.logging.Logger;
+
 /**
  *
  * @author gary
  * @param <T>
  */
-public class Variable <T> implements VariablePointer<T> {
+public interface Variable <T> {
     
-    private final Object subject;
-    private final Class<T> type;
-    private final Pull<T> getter;
-    private final Push<T> setter;
+    public static final Logger LOG = Logger.getLogger(Variable.class.getName());
+    public static final String DEF_GROUP = "default-variable-group";
     
-    public Variable(Object subject, Class<T> type, Pull<T> getter, Push<T> setter) {
-        this.subject = subject;
-        this.type = type;
-        this.getter = getter;
-        this.setter = setter;
-        initialize();
-    }
+    /**
+     * The type of variable this pointer is tracking.
+     * @return 
+     */
+    public Class<T> getVariableType();
+    /**
+     * The object which this tracked variable belongs to.
+     * @return 
+     */
+    public Object getSubject();
+    /**
+     * Get Pull object.
+     * @return 
+     */
+    public Pull<T> getPuller();
+    /**
+     * Get Push object.
+     * @return 
+     */
+    public Push<T> getPusher();
     
-    private void initialize() {        
-        getter.setUser(this);
-        setter.setUser(this);
+    /**
+     * Get string representing the name of this pointer.
+     * @return 
+     */
+    public default String getVariableLabel() {
+        return getPusher().getSetterName();
     }
-        
-    @Override
-    public Class<T> getVariableType() {
-        return type;
+    /**
+     * Returns a string representing which group this variable belongs to.
+     * Used generally used to group variables together that will be removed
+     * in the same time.
+     * @return 
+     */
+    public default String getVariableGroup() {
+        return DEF_GROUP;
     }
-    @Override
-    public Object getSubject() {
-        return subject;
+    /**
+     * Pulls the tracked variable's value.
+     * @return 
+     */
+    public default T getVariableValue() {
+        return getVariableValue(false);
     }
-    @Override
-    public Pull<T> getPuller() {
-        return getter;
+    /**
+     * Pulls the tracked variable's value.
+     * @param sneaky if true, does not set the last access token used for detecting changes
+     * @return 
+     */
+    public default T getVariableValue(boolean sneaky) {
+        return getPuller().pull();
     }
-    @Override
-    public Push<T> getPusher() {
-        return setter;
-    }
-    @Override
-    public String toString() {
-        return getClass().getSimpleName()+"["+getPusher().getSetterName()+"]";
+    /**
+     * Pushes the given value onto the tracked variable.
+     * @param value 
+     */
+    public default void setVariableValue(T value) {
+        getPusher().push(value);
     }
     
 }

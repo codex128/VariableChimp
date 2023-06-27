@@ -4,7 +4,7 @@
  */
 package codex.varchimp;
 
-import static codex.varchimp.VariablePointer.LOG;
+import static codex.varchimp.Variable.LOG;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.logging.Level;
@@ -16,14 +16,14 @@ import java.util.logging.Level;
  */
 public class Pull <T> {
     
-    protected VariablePointer<T> user;
+    protected Variable<T> user;
     protected String getter;
     
     public Pull(String getter) {
         this.getter = getter;
     }
     
-    protected void setUser(VariablePointer<T> user) {
+    protected void setUser(Variable<T> user) {
         this.user = user;
     }
     
@@ -45,7 +45,7 @@ public class Pull <T> {
         return null;
     }
     
-    public VariablePointer<T> getUser() {
+    public Variable<T> getUser() {
         return user;
     }
     public String getGetterName() {

@@ -7,7 +7,7 @@ package codex.vctests;
 import codex.varchimp.Pull;
 import codex.varchimp.Push;
 import codex.varchimp.VarChimp;
-import codex.varchimp.Variable;
+import codex.varchimp.Var;
 import com.jme3.app.SimpleApplication;
 import com.jme3.input.KeyInput;
 import com.jme3.input.controls.ActionListener;
@@ -16,6 +16,7 @@ import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Geometry;
+import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import com.jme3.scene.shape.Box;
 import com.simsilica.lemur.GuiGlobals;
@@ -53,8 +54,11 @@ public class TestGame extends SimpleApplication implements ActionListener {
         inputManager.addMapping("start-varchimp", new KeyTrigger(KeyInput.KEY_F));
         inputManager.addListener(this, "jump", "start-varchimp");
         
-        VarChimp.get().register(new Variable(this, Vector3f.class, new Pull("getPosition"), new Push("setPosition")));
-        //VarChimp.get().register(new Variable(this, float.class, new Pull("getJumpForce"), new Push("setJumpForce")));
+        Node myNode = new Node();
+        Var v = new Var(myNode, Vector3f.class, new Pull("getLocalTranslation"), new Push("setLocalTranslation"));
+        VarChimp.get().register(v);
+        
+        //VarChimp.get().register(new Var(this, float.class, new Pull("getJumpForce"), new Push("setJumpForce")));
         
     }
     @Override

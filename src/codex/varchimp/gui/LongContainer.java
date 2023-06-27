@@ -4,41 +4,42 @@
  */
 package codex.varchimp.gui;
 
+import com.simsilica.lemur.RangedValueModel;
 import codex.varchimp.Variable;
 
 /**
  *
  * @author gary
  */
-public class DoubleContainer extends VariableContainer<Double> {
+public class LongContainer extends VariableContainer<Long> {
     
     NumberScroller scroller;
     
-    public DoubleContainer(Variable variable) {
+    public LongContainer(Variable<Long> variable) {
         super(variable);
     }
     
     @Override
     protected void initEditingGui() {
         scroller = editContainer.addChild(new NumberScroller());
-        scroller.setModel(VariableContainer.createDefaultModel(Double.class));
-        setReference(scroller.getModel().createReference());
+        scroller.setModel(VariableContainer.createDefaultModel(Long.class));
+        scroller.setValueDisplay((RangedValueModel model) -> ""+(long)model.getValue());
     }
     @Override
-    protected void pull(Double value) {
+    protected void pull(Long value) {
         scroller.getModel().setValue(value);
     }
     @Override
-    protected Double push() {
-        return scroller.getModel().getValue();
+    protected Long push() {
+        return (long)scroller.getModel().getValue();
     }
     @Override
     public Class getVariableType() {
-        return double.class;
+        return long.class;
     }
     @Override
-    public VariableContainer create(Variable variable) {
-        return new DoubleContainer(variable);
+    public VariableContainer create(Variable field) {
+        return new LongContainer(field);
     }
     
 }

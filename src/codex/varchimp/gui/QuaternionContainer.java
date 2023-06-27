@@ -5,7 +5,7 @@
 package codex.varchimp.gui;
 
 import codex.varchimp.CombinedReference;
-import com.jme3.math.Vector3f;
+import com.jme3.math.Quaternion;
 import com.simsilica.lemur.Label;
 import com.simsilica.lemur.component.SpringGridLayout;
 import codex.varchimp.Variable;
@@ -14,11 +14,11 @@ import codex.varchimp.Variable;
  *
  * @author gary
  */
-public class Vector3fContainer extends VariableContainer<Vector3f> {
+public class QuaternionContainer extends VariableContainer<Quaternion> {
     
     NumberScroller x, y, z;
     
-    public Vector3fContainer(Variable<Vector3f> variable) {
+    public QuaternionContainer(Variable<Quaternion> variable) {
         super(variable);
     }
     
@@ -27,43 +27,43 @@ public class Vector3fContainer extends VariableContainer<Vector3f> {
         SpringGridLayout layout = new SpringGridLayout();
         editContainer.setLayout(layout);
         layout.addChild(0, 0, new Label("x:"));
-        x = layout.addChild(0, 1, new NumberScroller());    
+        x = layout.addChild(0, 1, new NumberScroller());
         x.setModel(VariableContainer.createDefaultModel(Float.class));
         x.setValueDisplay(new LimitedValueDisplay(5));
         layout.addChild(1, 0, new Label("y:"));
-        y = layout.addChild(1, 1, new NumberScroller());        
+        y = layout.addChild(1, 1, new NumberScroller());
         y.setModel(VariableContainer.createDefaultModel(Float.class));
         y.setValueDisplay(new LimitedValueDisplay(5));
         layout.addChild(2, 0, new Label("z:"));
         z = layout.addChild(2, 1, new NumberScroller());
         z.setModel(VariableContainer.createDefaultModel(Float.class));
-        y.setValueDisplay(new LimitedValueDisplay(5));
+        z.setValueDisplay(new LimitedValueDisplay(5));
         setReference(new CombinedReference(
                 x.getModel().createReference(),
                 y.getModel().createReference(),
                 z.getModel().createReference()));
     }
     @Override
-    protected void pull(Vector3f value) {
-        x.getModel().setValue(value.x);
-        y.getModel().setValue(value.y);
-        z.getModel().setValue(value.z);
+    protected void pull(Quaternion value) {
+        float[] angles = value.toAngles(new float[3]);
+        x.getModel().setValue(angles[0]);
+        y.getModel().setValue(angles[1]);
+        z.getModel().setValue(angles[2]);
     }
     @Override
-    protected Vector3f push() {
-        Vector3f value = new Vector3f();
-        value.x = (float)x.getModel().getValue();
-        value.y = (float)y.getModel().getValue();
-        value.z = (float)z.getModel().getValue();
-        return value;
+    protected Quaternion push() {
+        return new Quaternion().fromAngles(
+                (float)x.getModel().getValue(),
+                (float)y.getModel().getValue(),
+                (float)z.getModel().getValue());
     }
     @Override
     public Class getVariableType() {
-        return Vector3f.class;
+        return Quaternion.class;
     }
     @Override
-    public VariableContainer create(Variable variable) {
-        return new Vector3fContainer(variable);
+    public VariableContainer create(Variable field) {
+        return new QuaternionContainer(field);
     }
     
 }

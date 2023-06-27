@@ -12,7 +12,9 @@ import com.simsilica.lemur.FillMode;
 import com.simsilica.lemur.Label;
 import com.simsilica.lemur.component.BoxLayout;
 import com.simsilica.lemur.core.VersionedReference;
-import codex.varchimp.VariablePointer;
+import com.simsilica.lemur.DefaultRangedValueModel;
+import com.simsilica.lemur.RangedValueModel;
+import codex.varchimp.Variable;
 
 /**
  *
@@ -21,12 +23,12 @@ import codex.varchimp.VariablePointer;
  */
 public abstract class VariableContainer <T> extends Container implements VariableContainerFactory {
     
-    protected final VariablePointer<T> variable;
+    protected final Variable<T> variable;
     protected Container editContainer, buttonContainer;
     protected VersionedReference reference;
     private boolean initialized = false;
     
-    public VariableContainer(VariablePointer<T> variable) {
+    public VariableContainer(Variable<T> variable) {
         this.variable = variable;
     }
     
@@ -87,7 +89,7 @@ public abstract class VariableContainer <T> extends Container implements Variabl
         reference = ref;
     }
     
-    public VariablePointer<T> getVariable() {
+    public Variable<T> getVariable() {
         return variable;
     }
     public VersionedReference getReference() {
@@ -97,6 +99,21 @@ public abstract class VariableContainer <T> extends Container implements Variabl
         return initialized;
     }
     
+    public static RangedValueModel createDefaultModel(Class<? extends Number> type) {
+        if (Integer.class.isAssignableFrom(type)) {
+            return new DefaultRangedValueModel(Integer.MIN_VALUE, Integer.MAX_VALUE, 0);
+        }
+        else if (Float.class.isAssignableFrom(type)) {
+            return new DefaultRangedValueModel(-Float.MAX_VALUE, Float.MAX_VALUE, 0f);
+        }
+        else if (Double.class.isAssignableFrom(type)) {
+            return new DefaultRangedValueModel(-Double.MAX_VALUE, Double.MAX_VALUE, 0.0);
+        }
+        else if (Long.class.isAssignableFrom(type)) {
+            return new DefaultRangedValueModel(Long.MIN_VALUE, Long.MAX_VALUE, 0l);
+        }
+        return null;
+    }
     
     private class PushPullCommand implements Command<Button> {
         

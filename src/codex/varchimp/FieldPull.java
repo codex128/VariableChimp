@@ -22,7 +22,7 @@ public class FieldPull <T> extends Pull<T> {
     }
     
     @Override
-    public void setUser(VariablePointer<T> user) {
+    public void setUser(Variable<T> user) {
         super.setUser(user);
         if (this.user != null) {
             try {

@@ -11,12 +11,14 @@ import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector2f;
 import com.simsilica.lemur.Container;
 import com.simsilica.lemur.GuiGlobals;
-import com.simsilica.lemur.component.BoxLayout;
 import com.simsilica.lemur.event.PopupState;
 import java.util.LinkedList;
 import java.util.logging.Logger;
 import java.util.logging.Level;
 import codex.varchimp.gui.VariableContainerFactory;
+import com.simsilica.lemur.component.SpringGridLayout;
+import java.io.File;
+import java.util.function.Function;
 
 /**
  *
@@ -27,12 +29,14 @@ public class VarChimpAppState extends BaseAppState {
     public static final String FIELD_USERDATA = "FieldChimp[field]";
     private static final Logger LOG = Logger.getLogger(VarChimpAppState.class.getName());
     
-    LinkedList<VariablePointer> variables = new LinkedList<>();
-    LinkedList<VariablePointer> preInitVars = new LinkedList<>();
+    LinkedList<Variable> variables = new LinkedList<>();
+    LinkedList<Variable> preInitVars = new LinkedList<>();
     LinkedList<VariableContainer> containers = new LinkedList<>();
     LinkedList<VariableContainerFactory> factories = new LinkedList<>();
     Container gui = new Container();
     Container varList = new Container();
+    SpringGridLayout varLayout;
+    File layoutPrefs;
     Vector2f windowSize;
     ColorRGBA background = new ColorRGBA(0f, 0f, 0f, .7f);
     boolean cursorLocked = false;
@@ -50,10 +54,11 @@ public class VarChimpAppState extends BaseAppState {
         
         gui.addChild(varList);
         gui.setLocalTranslation(0f, windowSize.y, 0f);
-        varList.setLayout(new BoxLayout());
+        varLayout = new SpringGridLayout();
+        varList.setLayout(varLayout);
         
-        for (VariablePointer f : preInitVars) {
-            initField(f);
+        for (Variable f : preInitVars) {
+            initVariable(f);
         }
         preInitVars.clear();
         
@@ -80,22 +85,28 @@ public class VarChimpAppState extends BaseAppState {
     @Override
     public void update(float tpf) {}
     
-    private void initField(VariablePointer field) {
-        VariableContainerFactory factory = getFactory(field);
+    private void initVariable(Variable variable) {
+        VariableContainerFactory factory = getFactory(variable);
         if (factory == null) {
-            LOG.log(Level.WARNING, "Field has no corresponding factory!");
+            LOG.log(Level.WARNING, "Variable has no corresponding factory!");
             return;
         }
-        variables.add(field);
-        VariableContainer container = factory.create(field);
+        variables.add(variable);
+        VariableContainer container = factory.create(variable);
         containers.add(container);
         container.initialize();
-        varList.addChild(container);
+        varLayout.addChild(0, 0, container);
         container.getReference().update();
     }
-    private VariableContainerFactory getFactory(VariablePointer field) {
+    private void cleanupVariable(Variable variable) {
+        if (!variables.remove(variable)) return;
+        VariableContainer container = getVariableContainer(variable);
+        if (!containers.remove(container)) return;
+        varList.detachChild(container);
+    }
+    private VariableContainerFactory getFactory(Variable variable) {
         for (VariableContainerFactory f : factories) {
-            if (f.accept(field)) {
+            if (f.accept(variable)) {
                 return f;
             }
         }
@@ -132,22 +143,41 @@ public class VarChimpAppState extends BaseAppState {
         });
     }
     
-    public void register(VariablePointer field) {
-        if (!variables.contains(field)) {
-            if (isInitialized()) initField(field);
-            else preInitVars.add(field);
+    public void register(Variable variable) {
+        if (!variables.contains(variable)) {
+            if (isInitialized()) initVariable(variable);
+            else preInitVars.add(variable);
         }
     }
-    public void registerAll(VariablePointer... fields) {
-        for (VariablePointer f : fields) {
+    public void registerAll(Variable... variables) {
+        for (Variable f : variables) {
             register(f);
         }
     }
-    public boolean remove(VariablePointer field) {
-        return variables.remove(field);
+    
+    public boolean remove(Variable variable) {
+        return variables.remove(variable);
+    }
+    public void removeAllMatching(Function<Variable, Boolean> test) {
+        LinkedList<Variable> remove = new LinkedList<>();
+        for (Variable v : variables) {
+            if (test.apply(v)) {
+                remove.add(v);
+            }
+        }
+        for (Variable v : remove) {
+            cleanupVariable(v);
+        }
+    }
+    public void removeGroup(String group) {
+        removeAllMatching(v -> v.getVariableGroup().equals(group));
     }
     public void clear() {
         variables.clear();
+    }
+    
+    private VariableContainer getVariableContainer(Variable variable) {
+        return containers.stream().filter(c -> c.getVariable() == variable).findAny().orElse(null);
     }
     
     public void registerFactory(VariableContainerFactory factory) {

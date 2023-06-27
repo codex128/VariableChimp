@@ -4,7 +4,7 @@
  */
 package codex.varchimp.gui;
 
-import codex.varchimp.VariablePointer;
+import codex.varchimp.Variable;
 
 /**
  *
@@ -14,9 +14,9 @@ import codex.varchimp.VariablePointer;
 public interface VariableContainerFactory <T> {
     
     public Class<T> getVariableType();    
-    public abstract VariableContainer create(VariablePointer field);
+    public abstract VariableContainer create(Variable field);
     
-    public default boolean accept(VariablePointer variable) {
+    public default boolean accept(Variable variable) {
         return getVariableType().isAssignableFrom(variable.getVariableType());
     }    
     

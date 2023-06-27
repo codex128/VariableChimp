@@ -4,9 +4,10 @@
  */
 package codex.varchimp;
 
-import static codex.varchimp.VariablePointer.LOG;
+import static codex.varchimp.Variable.LOG;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.LinkedList;
 import java.util.logging.Level;
 
 /**
@@ -16,18 +17,22 @@ import java.util.logging.Level;
  */
 public class Push <T> {
     
-    protected VariablePointer<T> user;
+    protected Variable<T> user;
     protected String setter;
+    protected LinkedList<OutgoingValueModifier<T>> modifiers = new LinkedList<>();
     
     public Push(String setter) {
         this.setter = setter;
     }
     
-    protected void setUser(VariablePointer<T> user) {
+    protected void setUser(Variable<T> user) {
         this.user = user;
     }
     public void push(T value) {
         if (user == null) return;
+        for (OutgoingValueModifier<T> mod : modifiers) {
+            value = mod.modify(value);
+        }
         try {
             Method method = user.getSubject().getClass().getMethod(setter, user.getVariableType());
             method.invoke(user.getSubject(), value);
@@ -38,11 +43,15 @@ public class Push <T> {
         }
     }
     
-    public VariablePointer<T> getUser() {
+    public Variable<T> getUser() {
         return user;
     }
     public String getSetterName() {
         return setter;
+    }
+    public Push<T> addModifier(OutgoingValueModifier<T> mod) {
+        modifiers.addLast(mod);
+        return this;
     }
     
 }
