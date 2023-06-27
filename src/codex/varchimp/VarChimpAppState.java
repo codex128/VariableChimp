@@ -185,7 +185,7 @@ public class VarChimpAppState extends BaseAppState implements StateFunctionListe
         for (Variable f : variables) {
             register(f, true);
         }
-    }  
+    } 
     
     public Stream<Variable> streamGroup(String group) {
         return variables.stream().filter(v -> group.equals(v.getVariableGroup()));
@@ -248,6 +248,35 @@ public class VarChimpAppState extends BaseAppState implements StateFunctionListe
         c.applyTo(subject);
         if (removeOnApply) removeCache(c);
         return c;
+    }
+    /**
+     * Apply the cache (of the group) only if it exists.
+     * Otherwise, runs the Runnable. Removes cache when applied by default.
+     * @param group
+     * @param subject
+     * @param run
+     * @return 
+     */
+    public CachedVariableGroup applyCacheOrElse(String group, Object subject, Runnable run) {
+        return applyCacheOrElse(group, subject, true, run);
+    }
+    /**
+     * Apply the cache (of the group) only if it exists.Otherwise, runs the Runnable.
+     * @param group
+     * @param subject
+     * @param removeOnApply
+     * @param run
+     * @return 
+     */
+    public CachedVariableGroup applyCacheOrElse(String group, Object subject, boolean removeOnApply, Runnable run) {
+        CachedVariableGroup c = getCache(group);
+        if (c != null) {
+            c.applyTo(subject);
+            if (removeOnApply) removeCache(c);
+            return c;
+        }
+        run.run();
+        return null;
     }
     /**
      * Removes the cache (of the given group).

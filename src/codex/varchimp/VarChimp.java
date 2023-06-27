@@ -20,6 +20,7 @@ public class VarChimp {
     private static VarChimpAppState instance;
     private static VarChimpInitializer initializer = VarChimpInitializer.DEFAULT;
     
+    public static final String VERSION = "v0.7";
     public static final String
             ACTIVE_INPUT = "VarChimp-activeinput",
             PASSIVE_INPUT = "VarChimp-passiveinput";
@@ -34,6 +35,7 @@ public class VarChimp {
      */
     public static void initialize(Application app) {
         assert app != null;
+        System.out.println("Initializing VariableChimp "+VERSION);
         if (GuiGlobals.getInstance() == null) {
             throw new NullPointerException("Lemur GUI context not started!");
         }

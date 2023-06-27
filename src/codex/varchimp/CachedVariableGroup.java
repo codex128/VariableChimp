@@ -4,6 +4,7 @@
  */
 package codex.varchimp;
 
+import codex.varchimp.gui.VariableContainer;
 import java.util.LinkedList;
 import java.util.stream.Stream;
 
@@ -59,7 +60,13 @@ public class CachedVariableGroup {
      */
     public void applyTo(Object subject, boolean pull) {
         cache.stream().forEach(v -> {
-            VarChimp.get().register(v.variable.copy(subject), pull);
+            Variable variable = v.variable.copy(subject);
+            VarChimp.get().register(variable, pull);
+            if (!pull) {
+                VariableContainer container = VarChimp.get().getVariableContainer(variable);
+                container.applyPullValue(v.value);
+                container.pushValue();
+            }
         });
     }
     

@@ -89,6 +89,13 @@ public abstract class VariableContainer <T> extends Container implements Variabl
         variable.setVariableValue(push());
     }
     /**
+     * Pulls and applies the given value to the GUI, no questions asked.
+     * @param value 
+     */
+    public void applyPullValue(T value) {
+        pull(value);
+    }
+    /**
      * Fetches (without actually performing a push) the push value.
      * @return 
      */
