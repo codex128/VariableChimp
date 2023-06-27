@@ -16,13 +16,13 @@ import java.util.LinkedList;
 import java.util.logging.Logger;
 import java.util.logging.Level;
 import codex.varchimp.gui.VariableContainerFactory;
-import com.simsilica.lemur.component.SpringGridLayout;
+import com.simsilica.lemur.component.BoxLayout;
 import com.simsilica.lemur.input.FunctionId;
 import com.simsilica.lemur.input.InputMapper;
 import com.simsilica.lemur.input.InputState;
 import com.simsilica.lemur.input.StateFunctionListener;
-import java.io.File;
 import java.util.function.Function;
+import java.util.stream.Stream;
 
 /**
  *
@@ -37,12 +37,13 @@ public class VarChimpAppState extends BaseAppState implements StateFunctionListe
     LinkedList<Variable> preInitVars = new LinkedList<>();
     LinkedList<VariableContainer> containers = new LinkedList<>();
     LinkedList<VariableContainerFactory> factories = new LinkedList<>();
+    LinkedList<CachedVariableGroup> caches = new LinkedList<>();
     Container gui = new Container();
     Container varList = new Container();
-    SpringGridLayout varLayout;
-    File layoutPrefs;
+    BoxLayout varLayout;
     Vector2f windowSize;
     ColorRGBA background = new ColorRGBA(0f, 0f, 0f, .7f);
+    String currentDefaultGroup;
     boolean cursorLocked = false;
     boolean popupOpen = false;
     
@@ -58,11 +59,11 @@ public class VarChimpAppState extends BaseAppState implements StateFunctionListe
         
         gui.addChild(varList);
         gui.setLocalTranslation(0f, windowSize.y, 0f);
-        varLayout = new SpringGridLayout();
+        varLayout = new BoxLayout();
         varList.setLayout(varLayout);
         
         for (Variable f : preInitVars) {
-            initVariable(f);
+            initVariable(f, true);
         }
         preInitVars.clear();
         
@@ -76,6 +77,7 @@ public class VarChimpAppState extends BaseAppState implements StateFunctionListe
         clear();
         containers.clear();
         factories.clear();
+        clearAllCaches();
         InputMapper im = GuiGlobals.getInstance().getInputMapper();
         im.removeStateListener(this, VarChimp.F_OPENWINDOW);
         im.deactivateGroup(VarChimp.ACTIVE_INPUT);
@@ -106,17 +108,20 @@ public class VarChimpAppState extends BaseAppState implements StateFunctionListe
         }
     }
     
-    private void initVariable(Variable variable) {
+    private void initVariable(Variable variable, boolean pull) {
         VariableContainerFactory factory = getFactory(variable);
         if (factory == null) {
             LOG.log(Level.WARNING, "Variable has no corresponding factory!");
             return;
         }
+        if (currentDefaultGroup != null && variable.getVariableGroup() == null) {
+            variable.setVariableGroup(currentDefaultGroup);
+        }
         variables.add(variable);
         VariableContainer container = factory.create(variable);
         containers.add(container);
-        container.initialize();
-        varLayout.addChild(0, 0, container);
+        container.initialize(pull);
+        varLayout.addChild(container);
         container.getReference().update();
     }
     private void cleanupVariable(Variable variable) {
@@ -151,29 +156,131 @@ public class VarChimpAppState extends BaseAppState implements StateFunctionListe
     private void setPopupAsClosed() {
         popupOpen = false;
     }
+    public VariableContainer getVariableContainer(Variable variable) {
+        return containers.stream().filter(c -> c.getVariable() == variable).findAny().orElse(null);
+    }
     
     public void pushChanges() {
         containers.stream().filter(f -> f.getReference().update()).forEach(f -> {
-            f.pushFieldValue();
+            f.pushValue();
         });
     }
     public void pullChanges() {
         containers.stream().forEach(f -> {
-            f.pullFieldValue();
+            f.pullValue();
             f.getReference().update();
         });
     }
     
     public void register(Variable variable) {
+        register(variable, true);
+    }
+    public void register(Variable variable, boolean pull) {
         if (!variables.contains(variable)) {
-            if (isInitialized()) initVariable(variable);
+            if (isInitialized()) initVariable(variable, pull);
             else preInitVars.add(variable);
         }
     }
     public void registerAll(Variable... variables) {
         for (Variable f : variables) {
-            register(f);
+            register(f, true);
         }
+    }  
+    
+    public Stream<Variable> streamGroup(String group) {
+        return variables.stream().filter(v -> group.equals(v.getVariableGroup()));
+    }
+    /**
+     * Create and store a cache of all variables in the given group.
+     * Removes all variables from the update list in the cache by default, because that is
+     * probably the best practice. Otherwise, there might be some collision
+     * between variables that are basically the same.
+     * @param group
+     * @return created cache
+     */
+    public CachedVariableGroup cacheGroup(String group) {
+        return cacheGroup(group, true);
+    }
+    /**
+     * Create and store a cache of all variables in the given group.
+     * @param group
+     * @param removeOnCache if true, removes all variables from the update list that are part of the cache.
+     * It is highly suggested to do this.
+     * @return created cache
+     */
+    public CachedVariableGroup cacheGroup(String group, boolean removeOnCache) {
+        CachedVariableGroup c = new CachedVariableGroup();
+        c.addAll(streamGroup(group));
+        caches.addLast(c);
+        if (removeOnCache) removeGroup(group);
+        return c;
+    }
+    /**
+     * Returns the first cache of the given group.
+     * Or null if none is found.
+     * @param group
+     * @return 
+     */
+    public CachedVariableGroup getCache(String group) {
+        return caches.stream().filter(c -> group.equals(c.getGroupName())).findAny().orElse(null);
+    }
+    /**
+     * Applies all the variables in the cache (of the given group).
+     * Removes the cache by default, so that all variables stored in the cache are lost.
+     * This is the best practice, since the cache now stores basically redundent information
+     * and there might be collision between similar variables.
+     * @param group
+     * @param subject
+     * @return the applied cache
+     */
+    public CachedVariableGroup applyCache(String group, Object subject) {
+        return applyCache(group, subject, true);
+    }
+    /**
+     * Applies all the variables in the cache (of the given group).
+     * @param group
+     * @param subject
+     * @param removeOnApply removes the cache when applied
+     * @return the applied cache
+     */
+    public CachedVariableGroup applyCache(String group, Object subject, boolean removeOnApply) {
+        CachedVariableGroup c = getCache(group);
+        c.applyTo(subject);
+        if (removeOnApply) removeCache(c);
+        return c;
+    }
+    /**
+     * Removes the cache (of the given group).
+     * All variables in the cache will be lost, unless they were (for some reason)
+     * not removed from the update list when the cache was created.
+     * @param group
+     * @return 
+     */
+    public CachedVariableGroup removeCache(String group) {
+        CachedVariableGroup c = getCache(group);
+        if (c != null) removeCache(c);
+        return c;
+    }
+    /**
+     * Removes the given cache.
+     * All variables in the cache will be lost, unless they were (for some reason)
+     * not removed from the update list when the cache was created.
+     * @param cache
+     * @return 
+     */
+    public boolean removeCache(CachedVariableGroup cache) {
+        if (caches.remove(cache)) {
+            cache.clear();
+            return true;
+        }
+        return false;
+    }
+    /**
+     * Removes all caches.
+     */
+    public void clearAllCaches() {
+        caches.stream().forEach(c -> c.clear());
+        caches.clear();
     }
     
     public boolean remove(Variable variable) {
@@ -191,14 +298,14 @@ public class VarChimpAppState extends BaseAppState implements StateFunctionListe
         }
     }
     public void removeGroup(String group) {
-        removeAllMatching(v -> v.getVariableGroup().equals(group));
+        removeAllMatching(v -> group.equals(v.getVariableGroup()));
     }
     public void clear() {
         variables.clear();
     }
     
-    private VariableContainer getVariableContainer(Variable variable) {
-        return containers.stream().filter(c -> c.getVariable() == variable).findAny().orElse(null);
+    public void setDefaultGroup(String group) {
+        currentDefaultGroup = group;
     }
     
     public void registerFactory(VariableContainerFactory factory) {

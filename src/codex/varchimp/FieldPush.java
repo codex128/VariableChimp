@@ -26,7 +26,7 @@ public class FieldPush <T> extends Push<T> {
         super.setUser(user);
         if (this.user != null) {
             try {
-                field = this.user.getSubject().getClass().getField(setter);
+                field = this.user.getSubject().getClass().getDeclaredField(setter);
                 if (!field.getType().isAssignableFrom(this.user.getVariableType())) {
                     throw new IllegalArgumentException("Field type does not match variable type!");
                 }

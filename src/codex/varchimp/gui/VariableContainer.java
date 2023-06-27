@@ -49,8 +49,9 @@ public abstract class VariableContainer <T> extends Container implements Variabl
     
     /**
      * Initializes Lemur gui.
+     * @param pull if true, pull on initialization, otherwise push
      */
-    public void initialize() {
+    public void initialize(boolean pull) {
         addChild(new Label(variable.getVariableLabel()));
         editContainer = addChild(new Container());
         buttonContainer = addChild(new Container());
@@ -61,28 +62,38 @@ public abstract class VariableContainer <T> extends Container implements Variabl
             throw new NullPointerException("Versioned reference was not initialized, please initialize reference during initialization.");
         }
         initialized = true;
-        pullFieldValue();
+        if (pull) pullValue();
+        else pushValue();
     }
     protected void initButtons() {
         Button push = buttonContainer.addChild(new Button("Push"));
         push.addClickCommands(new PushPullCommand(true));
         Button pull = buttonContainer.addChild(new Button("Pull"));
         pull.addClickCommands(new PushPullCommand(false));
+        Button print = buttonContainer.addChild(new Button("Print"));
+        print.addClickCommands(new PrintCommand());
     }
     
     /**
      * Pulls the variable value to the gui value (similar to git's pull command).
      */
-    public void pullFieldValue() {
+    public void pullValue() {
         if (!isInitialized()) return;
         pull(variable.getVariableValue());
     }
     /**
      * Pushes the gui value to the variable value (similar to git's push command).
      */
-    public void pushFieldValue() {
+    public void pushValue() {
         if (!isInitialized()) return;
         variable.setVariableValue(push());
+    }
+    /**
+     * Fetches (without actually performing a push) the push value.
+     * @return 
+     */
+    public T fetchPushValue() {
+        return push();
     }
     
     protected void setReference(VersionedReference ref) {
@@ -125,8 +136,14 @@ public abstract class VariableContainer <T> extends Container implements Variabl
         
         @Override
         public void execute(Button source) {
-            if (push) pushFieldValue();
-            else pullFieldValue();
+            if (push) pushValue();
+            else pullValue();
+        }        
+    }
+    private class PrintCommand implements Command<Button> {
+        @Override
+        public void execute(Button source) {
+            System.out.println(variable.getVariableLabel()+" for "+variable.getSubject()+" = "+push());
         }        
     }
     

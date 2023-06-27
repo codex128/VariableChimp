@@ -22,6 +22,7 @@ public class FloatContainer extends VariableContainer<Float> {
     protected void initEditingGui() {
         scroller = editContainer.addChild(new NumberScroller());
         scroller.setModel(VariableContainer.createDefaultModel(Float.class));
+        scroller.setValueDisplay(new LimitedValueDisplay(5));
         reference = scroller.getModel().createReference();
     }
     @Override

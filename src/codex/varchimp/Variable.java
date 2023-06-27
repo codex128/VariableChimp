@@ -14,7 +14,6 @@ import java.util.logging.Logger;
 public interface Variable <T> {
     
     public static final Logger LOG = Logger.getLogger(Variable.class.getName());
-    public static final String DEF_GROUP = "default-variable-group";
     
     /**
      * The type of variable this pointer is tracking.
@@ -35,7 +34,19 @@ public interface Variable <T> {
      * Get Push object.
      * @return 
      */
-    public Push<T> getPusher();
+    public Push<T> getPusher();    
+    /**
+     * Set the group this variable is part of.
+     * @param group 
+     */
+    public void setVariableGroup(String group);
+    
+    /**
+     * Create a copy for the given subject.
+     * @param subject
+     * @return 
+     */
+    public Variable copy(Object subject);
     
     /**
      * Get string representing the name of this pointer.
@@ -51,7 +62,7 @@ public interface Variable <T> {
      * @return 
      */
     public default String getVariableGroup() {
-        return DEF_GROUP;
+        return null;
     }
     /**
      * Pulls the tracked variable's value.
