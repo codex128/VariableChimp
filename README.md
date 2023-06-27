@@ -27,52 +27,7 @@ Pulling, like the git command, is applying the field value to the GUI, so that t
 ### What is pushing?
 Pushing is exactly the opposite of pulling. Instead of applying the field to the GUI, we apply the GUI to the field (so that the field is whatever the GUI displays). The `Push` class handles pushing; it takes one argument, a string, which indicates a setter method belonging to the subject that sets the field we want to edit.
 
-# Customization
-VariableChimp is designed to meet your needs, whatever they are. It is designed to support (with some effort) any data type imaginable.
-
-### Creating Custom Variable GUI
-Any class that wants to display GUI for a variable type must extend `VariableContainer`.
-```
-public class MyCustomContainer extends VariableContainer<Double> {
-
-    Slider slider;
-
-    public MyCustomContainer(VariablePointer<Double> field) {
-        super(field);
-    }
-    
-    @Override
-    protected void initEditingGui() {
-        // create a simple slider gui
-        slider = ...;
-        // save the VersionedReference of the slider (very, very important!)
-        setReference(slider.getModel().createReference());
-    }
-    @Override
-    protected void pull(Double value) {
-        // display the incoming value on the GUI
-        slider.getModel().setValue(value);
-    }
-    @Override
-    protected Double push() {
-        // return whatever is being displayed on the GUI
-        return scroller.getModel().getValue();
-    }
-    @Override
-    public Class<Double> getVariableType() {
-        // return the data type MyCustomContainer is working with
-        return double.class;
-    }
-    @Override
-    public VariableContainer create(VariablePointer variable) {
-        // Creates a new MyCustomContainer.
-        // This is an implementation from
-        return new MyCustomContainer(variable);
-    }    
-}
-```
-
 # Dependencies
-* JMonkeyEngine 3.6 (probably works for earlier versions as well)
-* Lemur 1.16+
+* [JMonkeyEngine 3.6+](https://github.com/jMonkeyEngine/jmonkeyengine) (probably works for earlier versions such as 3.5 as well)
+* [Lemur 1.16+](https://github.com/jMonkeyEngine-Contributions/Lemur)
 * JDK 8+
