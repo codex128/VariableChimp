@@ -28,7 +28,10 @@ Pulling, like the git command, is applying the field value to the GUI, so that t
 Pushing is exactly the opposite of pulling. Instead of applying the field to the GUI, we apply the GUI to the field (so that the field is whatever the GUI displays). The `Push` class handles pushing; it takes one argument, a string, which indicates a setter method belonging to the subject that sets the field we want to edit.
 
 ### Direct Field Access
-Normally, `Push` and `Pull` access getters and setters in order to change fields. However, `FieldPull` and `FieldPush` directly access the field of the subject.
+Normally, `Push` and `Pull` access getters and setters in order to change fields. However, `FieldPull` and `FieldPush` directly access the field of the subject. They each require one string, which should be the exact name of the field.
+
+### Additional, Faster `Var` Constructors
+
 
 # More Advanced Usage
 
