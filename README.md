@@ -59,24 +59,23 @@ VarChimp.get().setDefaultGroup("my-group");
 ```
 
 ### Variable Caching
-VariableChimp allows you to temporarily cache variables, then apply them to a different object. This is useful if a state is replaced by another state, but you want to keep the same variables and their values.
+VariableChimp allows you to temporarily cache variables, then apply them to a different object. This is useful if you want to apply a group of variables to another subject.
 
 To cache a group:
 ```
-VarChimp.get().cacheGroup("my-variable-group");
+VarChimp.get().cacheGroup("my-group");
 ```
 To apply those variables to `myObject`:
 ```
-VarChimp.get().applyCache("my-variable-group", myObject);
+VarChimp.get().applyCache("my-group", myObject);
 ```
-Applying variables actually creates new copies and deletes (by default) the old variables.
-
 If you'd like to create new variables only if there is no cache to apply:
 ```
-VarChimp.get().applyCacheOrElse("my-variable-group", myObject, () -> {
-    VarChimp.get().register(new Var("my-variable-group", myObject, float.class, "myFloat"));
+VarChimp.get().applyCacheOrElse("my-group", myObject, () -> {
+    VarChimp.get().register(new Var("my-group", myObject, int.class, "num"));
 });
 ```
+Note that, but default, when you cache a variable it becomes unregistered, and when you apply a cache, it gets removed.
 
 # Dependencies
 * [JMonkeyEngine 3](https://github.com/jMonkeyEngine/jmonkeyengine) (only the latest stable version is being maintained)
