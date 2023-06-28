@@ -1,5 +1,5 @@
 # VariableChimp for JMonkeyEngine3
-VariableChimp allows developers to change fields during runtime with an easy-to-use interface. This can significantly boost development time because programmers would no longer have to restart the program every time they want to change a field value.
+VariableChimp allows developers to change fields during runtime using an in-program interface. This can significantly boost development time because programmers would no longer have to restart the program every time they want to tweak a field value.
 
 # Quick Start
 First, initialize VariableChimp using the `VarChimp` class.
@@ -12,6 +12,7 @@ Spatial mySpatial = new Node("my-spatial");
 Variable v = new Var(mySpatial, Vector3f.class, new Pull("getLocalTranslation"), new Push("setLocalTranslation"));
 VarChimp.get().register(v);
 ```
+In the program, press **F1** to toggle the VariableChimp GUI.
 
 ### What are `Variable` and `Var`?
 `Variable` is an interface for tracking and updating a field. `Var` is the class implementation of `Variable`.
