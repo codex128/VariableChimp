@@ -65,6 +65,6 @@ VarChimp.get().applyCacheOrElse("my-variable-group", myObject, () -> {
 ```
 
 # Dependencies
-* [JMonkeyEngine 3.6+](https://github.com/jMonkeyEngine/jmonkeyengine) (probably works for earlier versions such as 3.5 as well)
+* [JMonkeyEngine 3](https://github.com/jMonkeyEngine/jmonkeyengine) (only the latest stable version is being maintained)
 * [Lemur 1.16+](https://github.com/jMonkeyEngine-Contributions/Lemur)
 * JDK 8+
