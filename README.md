@@ -6,7 +6,7 @@ First, initialize VariableChimp using the `VarChimp` class.
 ```
 VarChimp.initialize(application);
 ```
-Then, register a Variable for changes. This code registers a `Var` which is used to track the local translation of a spatial.
+Then, register a Variable for changes. This code registers a `Var` which is used to change the local translation of a spatial.
 ```
 Spatial mySpatial = new Node("my-spatial");
 Variable v = new Var(mySpatial, Vector3f.class, new Pull("getLocalTranslation"), new Push("setLocalTranslation"));
