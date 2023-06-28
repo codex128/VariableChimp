@@ -2,7 +2,7 @@
 VariableChimp allows developers to change fields during runtime using an in-program interface. This can significantly boost development time because programmers would no longer have to restart the program every time they want to tweak a field value.
 
 # Quick Start
-First, initialize VariableChimp using the `VarChimp` class.
+First, initialize VariableChimp using the `VarChimp` class (make sure Lemur's `GuiGlobals` is initialized first).
 ```
 VarChimp.initialize(application);
 ```
