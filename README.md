@@ -44,6 +44,20 @@ new Var(myObject, int.class, "num");
 ### Variable Groups
 Putting variables in the same group is a great way to quickly access that set of variables, for whatever you need. The `Var` class has a setter for the group, or you can use a constructor to set it. Variables can change groups at any time.
 
+Variable has a setter method for the group name.
+```
+variable.setVariableGroup("my-group");
+```
+Or `Var` has constructors that set the group.
+```
+Variable v = new Var("my-group", myObject, int.class, "num");
+```
+If you do not set the group of the variable, the default group will be assigned when the variable is registered. Accessing and changing the default group can be done through VarChimp.
+```
+VarChimp.get().getDefaultGroup();
+VarChimp.get().setDefaultGroup("my-group");
+```
+
 ### Variable Caching
 VariableChimp allows you to temporarily cache variables, then apply them to a different object. This is useful if a state is replaced by another state, but you want to keep the same variables and their values.
 
