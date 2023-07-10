@@ -11,16 +11,26 @@ import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector2f;
 import com.simsilica.lemur.Container;
 import com.simsilica.lemur.GuiGlobals;
-import com.simsilica.lemur.event.PopupState;
 import java.util.LinkedList;
 import java.util.logging.Logger;
 import java.util.logging.Level;
 import codex.varchimp.gui.VariableContainerFactory;
+import com.jme3.app.SimpleApplication;
+import com.jme3.material.Material;
+import com.jme3.material.RenderState;
+import com.jme3.renderer.ViewPort;
+import com.jme3.renderer.queue.RenderQueue;
+import com.jme3.scene.Geometry;
+import com.jme3.scene.Node;
+import com.jme3.scene.Spatial;
+import com.jme3.scene.shape.Quad;
 import com.simsilica.lemur.Axis;
 import com.simsilica.lemur.Button;
 import com.simsilica.lemur.Command;
 import com.simsilica.lemur.FillMode;
 import com.simsilica.lemur.component.BoxLayout;
+import com.simsilica.lemur.core.GuiMaterial;
+import com.simsilica.lemur.core.LightingMaterialAdapter;
 import com.simsilica.lemur.input.FunctionId;
 import com.simsilica.lemur.input.InputMapper;
 import com.simsilica.lemur.input.InputState;
@@ -41,19 +51,23 @@ public class VarChimpAppState extends BaseAppState implements StateFunctionListe
     
     private static final Logger LOG = Logger.getLogger(VarChimpAppState.class.getName());
     
-    LinkedList<Variable> variables = new LinkedList<>();
-    LinkedList<Variable> preInitVars = new LinkedList<>();
-    LinkedList<VariableContainer> containers = new LinkedList<>();
-    LinkedList<VariableContainerFactory> factories = new LinkedList<>();
-    LinkedList<CachedVariableGroup> caches = new LinkedList<>();
-    Container gui = new Container();
-    Container varList = new Container();
-    BoxLayout varLayout;
-    Vector2f windowSize;
-    ColorRGBA background = new ColorRGBA(0f, 0f, 0f, .7f);
-    String currentDefaultGroup = "VarChimp-group";
-    boolean cursorLocked = false;
-    boolean popupOpen = false;
+    private LinkedList<Variable>
+            variables = new LinkedList<>(),
+            preInitVars = new LinkedList<>();
+    private LinkedList<VariableContainer> containers = new LinkedList<>();
+    private LinkedList<VariableContainerFactory> factories = new LinkedList<>();
+    private LinkedList<CachedVariableGroup> caches = new LinkedList<>();
+    private LinkedList<VarChimpListener> listeners = new LinkedList<>();
+    private ViewPort[] vps;
+    private Node node = new Node("varchimp-master-node");
+    private Container gui = new Container();
+    private Container varList = new Container();
+    private BoxLayout varLayout;
+    private Vector2f windowSize;
+    private GuiMaterial backgroundMat;
+    private String currentDefaultGroup = "varchimp-group";
+    private boolean cursorLocked = false;
+    private boolean popupOpen = false;
     
     /**
      *
@@ -72,15 +86,26 @@ public class VarChimpAppState extends BaseAppState implements StateFunctionListe
         windowSize = new Vector2f(app.getContext().getSettings().getWidth(),
                 app.getContext().getSettings().getHeight());
         
+        if (app instanceof SimpleApplication) {
+            vps = new ViewPort[]{((SimpleApplication)app).getGuiViewPort()};
+        }
+        else {
+            LOG.log(Level.INFO, "VariableChimp is unable to find the GUI view port. Must be set manually.");
+            vps = new ViewPort[0];
+        }
+        
+        node.setLocalTranslation(0f, 0f, 20f);
+        node.setCullHint(Spatial.CullHint.Never);
+        node.setQueueBucket(RenderQueue.Bucket.Gui);
+        node.attachChild(createBackgroundBlocker(-10f, new ColorRGBA(0f, 0f, 0f, .7f)));
+        node.attachChild(gui);
         initGlobalButtons();
         gui.addChild(varList);
         gui.setLocalTranslation(0f, windowSize.y, 0f);
         varLayout = new BoxLayout();
         varList.setLayout(varLayout);
         
-        for (Variable f : preInitVars) {
-            initVariable(f);
-        }
+        preInitVars.stream().forEach(v -> initVariable(v));
         preInitVars.clear();
         
         InputMapper im = GuiGlobals.getInstance().getInputMapper();
@@ -88,7 +113,6 @@ public class VarChimpAppState extends BaseAppState implements StateFunctionListe
         im.activateGroup(VarChimp.ACTIVE_INPUT);
         
     }
-
     /**
      *
      * @param app
@@ -99,11 +123,11 @@ public class VarChimpAppState extends BaseAppState implements StateFunctionListe
         containers.clear();
         factories.clear();
         clearAllCaches();
+        clearAllListeners();
         InputMapper im = GuiGlobals.getInstance().getInputMapper();
         im.removeStateListener(this, VarChimp.F_OPENWINDOW);
         im.deactivateGroup(VarChimp.ACTIVE_INPUT);
     }
-
     /**
      *
      */
@@ -115,27 +139,26 @@ public class VarChimpAppState extends BaseAppState implements StateFunctionListe
         im.activateGroup(VarChimp.PASSIVE_INPUT);
         cursorLocked = !GuiGlobals.getInstance().isCursorEventsEnabled();
         GuiGlobals.getInstance().setCursorEventsEnabled(true);
+        listeners.stream().forEach(l -> l.onVarChimpEnabled());
     }
-
     /**
      *
      */
     @Override
     protected void onDisable() {
+        listeners.stream().forEach(l -> l.onVarChimpDisabled());
         pushChanges();
         closePopup();
         InputMapper im = GuiGlobals.getInstance().getInputMapper();
         im.deactivateGroup(VarChimp.PASSIVE_INPUT);
         GuiGlobals.getInstance().setCursorEventsEnabled(!cursorLocked);
     }
-
     /**
      *
      * @param tpf
      */
     @Override
     public void update(float tpf) {}
-
     /**
      *
      * @param func
@@ -179,6 +202,23 @@ public class VarChimpAppState extends BaseAppState implements StateFunctionListe
         return null;
     }
     
+    private Geometry createBackgroundBlocker(float z, ColorRGBA color) {
+        Geometry blocker = new Geometry("background-blocker", new Quad(windowSize.x, windowSize.y));        
+        blocker.setMaterial(createBackgroundMaterial(color).getMaterial());
+        blocker.setLocalTranslation(0f, 0f, z);
+        return blocker;
+    }
+    private GuiMaterial createBackgroundMaterial(ColorRGBA color) {
+        if (backgroundMat != null) {
+            return backgroundMat;
+        }
+        backgroundMat = new LightingMaterialAdapter(new Material(getApplication().getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md"));
+        backgroundMat.setColor(color);
+        backgroundMat.getMaterial().getAdditionalRenderState().setBlendMode(RenderState.BlendMode.Alpha);
+        backgroundMat.getMaterial().setTransparent(true);
+        backgroundMat.getMaterial().getAdditionalRenderState().setFaceCullMode(RenderState.FaceCullMode.Off);
+        return backgroundMat;
+    }
     private void initGlobalButtons() {
         Container buttons = gui.addChild(new Container());
         BoxLayout layout = new BoxLayout(Axis.X, FillMode.Even);
@@ -190,21 +230,22 @@ public class VarChimpAppState extends BaseAppState implements StateFunctionListe
     }
     private void openPopup() {
         if (popupOpen) return;
-        getState(PopupState.class).showModalPopup(gui, (PopupState source) -> {
-            setPopupAsClosed();
-            setEnabled(false);
-        }, background);
+        for (ViewPort v : vps) {
+            v.attachScene(node);
+        }
         popupOpen = true;
     }
     private void closePopup() {
         if (popupOpen) {
-            getState(PopupState.class).closePopup(gui);
+            for (ViewPort v : vps) {
+                v.detachScene(node);
+            }
             setPopupAsClosed();
         }
     }
     private void setPopupAsClosed() {
         popupOpen = false;
-    }    
+    }
     
     /**
      * Push changes from the GUI to the variable.
@@ -424,12 +465,44 @@ public class VarChimpAppState extends BaseAppState implements StateFunctionListe
     }
     
     /**
+     * Sets the viewports that render the GUI.
+     * @param vps 
+     */
+    public void setViewPorts(ViewPort... vps) {
+        assert vps != null;
+        if (this.vps != null && popupOpen) for (ViewPort v : this.vps) {
+            v.detachScene(node);
+        }
+        this.vps = vps;
+        if (popupOpen) for (ViewPort v : this.vps) {
+            v.attachScene(node);
+        }
+    }
+    /**
      * Sets the default group all variables with no group are added to
      * on registration.
      * @param group 
      */
     public void setDefaultGroup(String group) {
         currentDefaultGroup = group;
+    }
+    /**
+     * Set the background color.
+     * @param color 
+     */
+    public void setBackgroundColor(ColorRGBA color) {
+        if (backgroundMat == null) createBackgroundMaterial(color);
+        else backgroundMat.setColor(color);
+    }
+    /**
+     * Set the z position of the gui scene.
+     * <p>
+     * Is useful to ensure that the gui is always rendered in front of all other gui elements
+     * rendered in the same viewport.
+     * @param z 
+     */
+    public void setZPosition(float z) {
+        node.setLocalTranslation(0f, 0f, z);
     }
     
     /**
@@ -465,15 +538,22 @@ public class VarChimpAppState extends BaseAppState implements StateFunctionListe
         }
     }
     
+    public void addListener(VarChimpListener listener) {
+        listeners.add(listener);
+    }
+    public boolean removeListener(VarChimpListener listener) {
+        return listeners.remove(listener);
+    }
+    public void clearAllListeners() {
+        listeners.clear();
+    }
     
-    private final class PushPullCommand implements Command<Button> {
-        
-        private boolean push;
-        
+    
+    private final class PushPullCommand implements Command<Button> {        
+        private boolean push;   
         public PushPullCommand(boolean push) {
             this.push = push;
-        }
-        
+        }        
         @Override
         public void execute(Button source) {
             if (push) pushChanges();
