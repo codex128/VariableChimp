@@ -30,7 +30,7 @@ import com.simsilica.lemur.Command;
 import com.simsilica.lemur.FillMode;
 import com.simsilica.lemur.component.BoxLayout;
 import com.simsilica.lemur.core.GuiMaterial;
-import com.simsilica.lemur.core.LightingMaterialAdapter;
+import com.simsilica.lemur.core.UnshadedMaterialAdapter;
 import com.simsilica.lemur.input.FunctionId;
 import com.simsilica.lemur.input.InputMapper;
 import com.simsilica.lemur.input.InputState;
@@ -158,7 +158,10 @@ public class VarChimpAppState extends BaseAppState implements StateFunctionListe
      * @param tpf
      */
     @Override
-    public void update(float tpf) {}
+    public void update(float tpf) {
+        node.updateLogicalState(tpf);
+        node.updateGeometricState();
+    }
     /**
      *
      * @param func
@@ -212,7 +215,7 @@ public class VarChimpAppState extends BaseAppState implements StateFunctionListe
         if (backgroundMat != null) {
             return backgroundMat;
         }
-        backgroundMat = new LightingMaterialAdapter(new Material(getApplication().getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md"));
+        backgroundMat = new UnshadedMaterialAdapter(new Material(getApplication().getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md"));
         backgroundMat.setColor(color);
         backgroundMat.getMaterial().getAdditionalRenderState().setBlendMode(RenderState.BlendMode.Alpha);
         backgroundMat.getMaterial().setTransparent(true);

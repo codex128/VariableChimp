@@ -53,7 +53,7 @@ public class CombinedReference extends VersionedReference {
     /**
      * A do-nothing versioned object.
      */
-    public static final class DudVersionedObject implements VersionedObject {
+    private static final class DudVersionedObject implements VersionedObject {
         
         /**
          *
