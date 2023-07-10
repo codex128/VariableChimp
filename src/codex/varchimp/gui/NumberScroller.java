@@ -21,16 +21,32 @@ import com.simsilica.lemur.style.StyleDefaults;
 import com.simsilica.lemur.style.Styles;
 
 /**
- *
+ * GUI element for editing numbers.
+ * 
  * @author gary
  */
 public class NumberScroller extends Panel {
     
+    /**
+     *
+     */
     public static final String
             ELEMENT_ID = "number-scroller",
-            INCREMENT_ID = "increment.button",
-            DECREMENT_ID = "decrement.button",
-            RANGE_ID = "range";
+
+    /**
+     *
+     */
+    INCREMENT_ID = "increment.button",
+
+    /**
+     *
+     */
+    DECREMENT_ID = "decrement.button",
+
+    /**
+     *
+     */
+    RANGE_ID = "range";
     
     private final ElementId id;
     private final BorderLayout layout;
@@ -42,18 +58,44 @@ public class NumberScroller extends Panel {
     private VersionedReference state;
     private ValueDisplay display = ValueDisplay.DEFAULT;
     
+    /**
+     *
+     */
     public NumberScroller() {
         this(new DefaultRangedValueModel(0, 1, 0), new ElementId(ELEMENT_ID), null);
     }
+
+    /**
+     *
+     * @param id
+     */
     public NumberScroller(ElementId id) {
         this(new DefaultRangedValueModel(0, 1, 0), id, null);
     }
+
+    /**
+     *
+     * @param style
+     */
     public NumberScroller(String style) {
         this(new DefaultRangedValueModel(0, 1, 0), new ElementId(ELEMENT_ID), style);
     }
+
+    /**
+     *
+     * @param id
+     * @param style
+     */
     public NumberScroller(ElementId id, String style) {
         this(new DefaultRangedValueModel(0, 1, 0), id, style);
     }
+
+    /**
+     *
+     * @param model
+     * @param id
+     * @param style
+     */
     public NumberScroller(RangedValueModel model, ElementId id, String style) {
         Styles styles = GuiGlobals.getInstance().getStyles();
         styles.initializeStyles(getClass());
@@ -73,6 +115,11 @@ public class NumberScroller extends Panel {
         decrement.addClickCommands(new ChangeValueCommand(-1));
     }
     
+    /**
+     *
+     * @param styles
+     * @param attrs
+     */
     @StyleDefaults(ELEMENT_ID)
     public static void initializeDefaultStyles( Styles styles, Attributes attrs ) {
         ElementId parent = new ElementId(ELEMENT_ID);
@@ -80,6 +127,10 @@ public class NumberScroller extends Panel {
         styles.getSelector(parent.child(DECREMENT_ID), null).set("text", "<", false);
     }
     
+    /**
+     *
+     * @param tpf
+     */
     @Override
     public void updateLogicalState(float tpf) {
         super.updateLogicalState(tpf);
@@ -88,23 +139,52 @@ public class NumberScroller extends Panel {
         }
     }
     
+    /**
+     *
+     * @param delta
+     */
     public void setDelta(double delta) {
         this.delta = delta;
     }
+
+    /**
+     *
+     * @return
+     */
     public double getDelta() {
         return delta;
     }
+
+    /**
+     *
+     * @return
+     */
     public RangedValueModel getModel() {
         return model;
     }
+
+    /**
+     *
+     * @param model
+     */
     public void setModel(RangedValueModel model) {
         if (this.model == model) return;
         this.model = model;
         state = this.model.createReference();
     }
+
+    /**
+     *
+     * @return
+     */
     public ValueDisplay getValueDisplay() {
         return display;
     }
+
+    /**
+     *
+     * @param display
+     */
     public void setValueDisplay(ValueDisplay display) {
         assert display != null;
         this.display = display;

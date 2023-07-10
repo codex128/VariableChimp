@@ -7,12 +7,16 @@ package codex.varchimp;
 import java.util.logging.Logger;
 
 /**
- *
+ * Maintains an assigned field through pushing and pulling.
+ * 
  * @author gary
  * @param <T>
  */
 public interface Variable <T> {
     
+    /**
+     *
+     */
     public static final Logger LOG = Logger.getLogger(Variable.class.getName());
     
     /**

@@ -16,11 +16,19 @@ public class CombinedReference extends VersionedReference {
     
     private final VersionedReference[] refs;
     
+    /**
+     *
+     * @param refs
+     */
     public CombinedReference(VersionedReference... refs) {
-        super(new DudVersionedObject());
+        super(DudVersionedObject.INSTANCE);
         this.refs = refs;
     }
     
+    /**
+     *
+     * @return
+     */
     @Override
     public boolean needsUpdate() {
         for (VersionedReference r : refs) {
@@ -28,6 +36,11 @@ public class CombinedReference extends VersionedReference {
         }
         return false;
     }
+
+    /**
+     *
+     * @return
+     */
     @Override
     public boolean update() {
         boolean updated = false;
@@ -37,16 +50,38 @@ public class CombinedReference extends VersionedReference {
         return updated;
     }    
     
+    /**
+     * A do-nothing versioned object.
+     */
     public static final class DudVersionedObject implements VersionedObject {
-
+        
+        /**
+         *
+         */
+        public static final DudVersionedObject INSTANCE = new DudVersionedObject();
+        
+        /**
+         *
+         * @return
+         */
         @Override
         public long getVersion() {
             return 0l;
         }
+
+        /**
+         *
+         * @return
+         */
         @Override
         public Object getObject() {
             return this;
         }
+
+        /**
+         *
+         * @return
+         */
         @Override
         public VersionedReference createReference() {
             return new VersionedReference(this);

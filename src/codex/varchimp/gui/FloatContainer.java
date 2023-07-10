@@ -7,13 +7,18 @@ package codex.varchimp.gui;
 import codex.varchimp.Variable;
 
 /**
- *
+ * Displays GUI for editing float values.
+ * 
  * @author gary
  */
 public class FloatContainer extends VariableContainer<Float> {
     
     NumberScroller scroller;
     
+    /**
+     *
+     * @param field
+     */
     public FloatContainer(Variable<Float> field) {
         super(field);
     }

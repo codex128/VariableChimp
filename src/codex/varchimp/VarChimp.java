@@ -20,10 +20,25 @@ public class VarChimp {
     private static VarChimpAppState instance;
     private static VarChimpInitializer initializer = VarChimpInitializer.DEFAULT;
     
+    /**
+     *
+     */
     public static final String VERSION = "v0.7";
+
+    /**
+     *
+     */
     public static final String
             ACTIVE_INPUT = "VarChimp-activeinput",
-            PASSIVE_INPUT = "VarChimp-passiveinput";
+
+    /**
+     *
+     */
+    PASSIVE_INPUT = "VarChimp-passiveinput";
+
+    /**
+     *
+     */
     public static final FunctionId
             F_OPENWINDOW = new FunctionId(ACTIVE_INPUT, "start-context");
     private static int

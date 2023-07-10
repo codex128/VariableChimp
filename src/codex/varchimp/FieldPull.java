@@ -9,7 +9,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- *
+ * Pulling that directly accesses a field belonging to the user's subject.
+ * 
  * @author gary
  * @param <T>
  */
@@ -17,10 +18,18 @@ public class FieldPull <T> extends Pull<T> {
     
     Field field;
     
+    /**
+     *
+     * @param getter
+     */
     public FieldPull(String getter) {
         super(getter);
     }
     
+    /**
+     *
+     * @param user
+     */
     @Override
     public void setUser(Variable<T> user) {
         super.setUser(user);

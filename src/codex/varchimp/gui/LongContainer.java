@@ -8,13 +8,18 @@ import com.simsilica.lemur.RangedValueModel;
 import codex.varchimp.Variable;
 
 /**
- *
+ * Displays GUI for editing long values.
+ * 
  * @author gary
  */
 public class LongContainer extends VariableContainer<Long> {
     
     NumberScroller scroller;
     
+    /**
+     *
+     * @param variable
+     */
     public LongContainer(Variable<Long> variable) {
         super(variable);
     }

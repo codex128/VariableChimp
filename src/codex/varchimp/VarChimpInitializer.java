@@ -14,11 +14,15 @@ import codex.varchimp.gui.Vector3fContainer;
 import com.jme3.app.Application;
 
 /**
- *
+ * Interface for performing things on VariableChimp initialization.
+ * 
  * @author gary
  */
 public interface VarChimpInitializer {
     
+    /**
+     * Array of all factory containers that ship with VariableChimp.
+     */
     public static final VariableContainerFactory[]
     DEF_FACTORIES = {
         new FloatContainer(null),
@@ -29,11 +33,19 @@ public interface VarChimpInitializer {
         new QuaternionContainer(null),
     };
     
+    /**
+     * Default initializer.
+     */
     public static final VarChimpInitializer
     DEFAULT = (Application app, VarChimpAppState state) -> {
         state.registerAllFactories(DEF_FACTORIES);
     };
     
+    /**
+     * Called on initialization.
+     * @param app
+     * @param state 
+     */
     public void initialize(Application app, VarChimpAppState state);
     
 }

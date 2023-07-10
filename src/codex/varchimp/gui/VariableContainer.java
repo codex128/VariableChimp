@@ -17,17 +17,38 @@ import com.simsilica.lemur.RangedValueModel;
 import codex.varchimp.Variable;
 
 /**
- *
+ * Maintains a GUI which displays and edits a data type.
+ * 
  * @author gary
  * @param <T>
  */
 public abstract class VariableContainer <T> extends Container implements VariableContainerFactory {
     
+    /**
+     *
+     */
     protected final Variable<T> variable;
-    protected Container editContainer, buttonContainer;
+
+    /**
+     *
+     */
+    protected Container editContainer,
+
+    /**
+     *
+     */
+    buttonContainer;
+
+    /**
+     *
+     */
     protected VersionedReference reference;
     private boolean initialized = false;
     
+    /**
+     * 
+     * @param variable 
+     */
     public VariableContainer(Variable<T> variable) {
         this.variable = variable;
     }
@@ -49,9 +70,8 @@ public abstract class VariableContainer <T> extends Container implements Variabl
     
     /**
      * Initializes Lemur gui.
-     * @param pull if true, pull on initialization, otherwise push
      */
-    public void initialize(boolean pull) {
+    public void initialize() {
         addChild(new Label(variable.getVariableLabel()));
         editContainer = addChild(new Container());
         buttonContainer = addChild(new Container());
@@ -62,9 +82,12 @@ public abstract class VariableContainer <T> extends Container implements Variabl
             throw new NullPointerException("Versioned reference was not initialized, please initialize reference during initialization.");
         }
         initialized = true;
-        if (pull) pullValue();
-        else pushValue();
+        pullValue();
     }
+
+    /**
+     *
+     */
     protected void initButtons() {
         Button push = buttonContainer.addChild(new Button("Push"));
         push.addClickCommands(new PushPullCommand(true));
@@ -103,20 +126,41 @@ public abstract class VariableContainer <T> extends Container implements Variabl
         return push();
     }
     
+    /**
+     * Sets the VersionedReferenced used to detect GUI changes.
+     * @param ref 
+     */
     protected void setReference(VersionedReference ref) {
         reference = ref;
     }
     
+    /**
+     * 
+     * @return 
+     */
     public Variable<T> getVariable() {
         return variable;
     }
+    /**
+     * Get the VersionedReference used to detect GUI changes.
+     * @return 
+     */
     public VersionedReference getReference() {
         return reference;
     }
+    /**
+     * 
+     * @return 
+     */
     public boolean isInitialized() {
         return initialized;
     }
     
+    /**
+     * Create a RangedValueModel for the number type.
+     * @param type
+     * @return 
+     */
     public static RangedValueModel createDefaultModel(Class<? extends Number> type) {
         if (Integer.class.isAssignableFrom(type)) {
             return new DefaultRangedValueModel(Integer.MIN_VALUE, Integer.MAX_VALUE, 0);

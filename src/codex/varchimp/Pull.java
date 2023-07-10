@@ -10,23 +10,46 @@ import java.lang.reflect.Method;
 import java.util.logging.Level;
 
 /**
- *
+ * Class for handling pulls.
+ * 
+ * Invokes a getter method defined by a string and returns the result.
+ * 
  * @author gary
  * @param <T>
  */
 public class Pull <T> {
     
+    /**
+     *
+     */
     protected Variable<T> user;
+
+    /**
+     *
+     */
     protected String getter;
     
+    /**
+     *
+     * @param getter
+     */
     public Pull(String getter) {
         this.getter = getter;
     }
     
+    /**
+     *
+     * @param user
+     */
     protected void setUser(Variable<T> user) {
         this.user = user;
     }
     
+    /**
+     * Fetches a value from the user's subject and returns it.
+     * Invokes a getter method defined by the getter string.
+     * @return 
+     */
     public T pull() {
         if (user == null) return null;
         try {
@@ -45,9 +68,17 @@ public class Pull <T> {
         return null;
     }
     
+    /**
+     * Get the user.
+     * @return 
+     */
     public Variable<T> getUser() {
         return user;
     }
+    /**
+     * Get the name of the getter method.
+     * @return 
+     */
     public String getGetterName() {
         return getter;
     }

@@ -9,13 +9,14 @@ import java.util.LinkedList;
 import java.util.stream.Stream;
 
 /**
- *
+ * Data set representing a single group of cached variables.
+ * 
  * @author gary
  */
 public class CachedVariableGroup {
     
-    String groupname;
-    LinkedList<CachedVariable> cache = new LinkedList<>();
+    private String groupname;
+    private LinkedList<CachedVariable> cache = new LinkedList<>();
     
     /**
      * Add a variable to this cache.
@@ -61,7 +62,7 @@ public class CachedVariableGroup {
     public void applyTo(Object subject, boolean pull) {
         cache.stream().forEach(v -> {
             Variable variable = v.variable.copy(subject);
-            VarChimp.get().register(variable, pull);
+            VarChimp.get().register(variable);
             if (!pull) {
                 VariableContainer container = VarChimp.get().getVariableContainer(variable);
                 container.applyPullValue(v.value);
@@ -70,13 +71,67 @@ public class CachedVariableGroup {
         });
     }
     
+    private void setGroupName(String name) {
+        groupname = name;
+    }
+    /**
+     * Get the group this cache is containing.
+     * @return 
+     */
     public String getGroupName() {
         return groupname;
     }
     
+    /**
+     * Create a cache of all given variables.
+     * <p>Assigns the group name to all variables.
+     * @param groupname
+     * @param variables
+     * @return 
+     */
+    public static CachedVariableGroup cache(String groupname, Variable... variables) {
+        CachedVariableGroup cache = new CachedVariableGroup();
+        cache.setGroupName(groupname);
+        for (Variable v : variables) {
+            v.setVariableGroup(groupname);
+            cache.add(v);
+        }
+        if (VarChimp.contextStarted()) {
+            VarChimp.get().addCache(cache);
+        }
+        return cache;
+    }
+    /**
+     * Create a cache of the variable stream.
+     * <p>Assigns the group name to all variables.
+     * @param groupname
+     * @param variables
+     * @return 
+     */
+    public static CachedVariableGroup cache(String groupname, Stream<Variable> variables) {
+        CachedVariableGroup cache = new CachedVariableGroup();
+        cache.setGroupName(groupname);
+        variables.forEach(v -> {
+            v.setVariableGroup(groupname);
+            cache.add(v);
+        });
+        if (VarChimp.contextStarted()) {
+            VarChimp.get().addCache(cache);
+        }
+        return cache;
+    }
+    
+    /**
+     *
+     */
     protected static final class CachedVariable {
         Variable variable;
         Object value;
+
+        /**
+         *
+         * @param variable
+         */
         protected CachedVariable(Variable variable) {
             this.variable = variable;
             value = VarChimp.get().getVariableContainer(this.variable).fetchPushValue();

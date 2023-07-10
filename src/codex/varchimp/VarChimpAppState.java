@@ -16,6 +16,10 @@ import java.util.LinkedList;
 import java.util.logging.Logger;
 import java.util.logging.Level;
 import codex.varchimp.gui.VariableContainerFactory;
+import com.simsilica.lemur.Axis;
+import com.simsilica.lemur.Button;
+import com.simsilica.lemur.Command;
+import com.simsilica.lemur.FillMode;
 import com.simsilica.lemur.component.BoxLayout;
 import com.simsilica.lemur.input.FunctionId;
 import com.simsilica.lemur.input.InputMapper;
@@ -25,12 +29,16 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 
 /**
- *
+ * This is the main management class for VariableChimp.
+ * 
+ * <p>A majority of VariableChimp actions are accessible by or through
+ * this class. To access this class, use {@code VarChimp.get()} after
+ * initializing VariableChimp.
+ * 
  * @author gary
  */
 public class VarChimpAppState extends BaseAppState implements StateFunctionListener {
     
-    public static final String FIELD_USERDATA = "FieldChimp[field]";
     private static final Logger LOG = Logger.getLogger(VarChimpAppState.class.getName());
     
     LinkedList<Variable> variables = new LinkedList<>();
@@ -43,27 +51,35 @@ public class VarChimpAppState extends BaseAppState implements StateFunctionListe
     BoxLayout varLayout;
     Vector2f windowSize;
     ColorRGBA background = new ColorRGBA(0f, 0f, 0f, .7f);
-    String currentDefaultGroup;
+    String currentDefaultGroup = "VarChimp-group";
     boolean cursorLocked = false;
     boolean popupOpen = false;
     
+    /**
+     *
+     */
     public VarChimpAppState() {
         setEnabled(false);
     }
     
+    /**
+     *
+     * @param app
+     */
     @Override
     protected void initialize(Application app) {
         
         windowSize = new Vector2f(app.getContext().getSettings().getWidth(),
                 app.getContext().getSettings().getHeight());
         
+        initGlobalButtons();
         gui.addChild(varList);
         gui.setLocalTranslation(0f, windowSize.y, 0f);
         varLayout = new BoxLayout();
         varList.setLayout(varLayout);
         
         for (Variable f : preInitVars) {
-            initVariable(f, true);
+            initVariable(f);
         }
         preInitVars.clear();
         
@@ -72,6 +88,11 @@ public class VarChimpAppState extends BaseAppState implements StateFunctionListe
         im.activateGroup(VarChimp.ACTIVE_INPUT);
         
     }
+
+    /**
+     *
+     * @param app
+     */
     @Override
     protected void cleanup(Application app) {
         clear();
@@ -82,6 +103,10 @@ public class VarChimpAppState extends BaseAppState implements StateFunctionListe
         im.removeStateListener(this, VarChimp.F_OPENWINDOW);
         im.deactivateGroup(VarChimp.ACTIVE_INPUT);
     }
+
+    /**
+     *
+     */
     @Override
     protected void onEnable() {
         openPopup();
@@ -91,6 +116,10 @@ public class VarChimpAppState extends BaseAppState implements StateFunctionListe
         cursorLocked = !GuiGlobals.getInstance().isCursorEventsEnabled();
         GuiGlobals.getInstance().setCursorEventsEnabled(true);
     }
+
+    /**
+     *
+     */
     @Override
     protected void onDisable() {
         pushChanges();
@@ -99,8 +128,20 @@ public class VarChimpAppState extends BaseAppState implements StateFunctionListe
         im.deactivateGroup(VarChimp.PASSIVE_INPUT);
         GuiGlobals.getInstance().setCursorEventsEnabled(!cursorLocked);
     }
+
+    /**
+     *
+     * @param tpf
+     */
     @Override
     public void update(float tpf) {}
+
+    /**
+     *
+     * @param func
+     * @param value
+     * @param tpf
+     */
     @Override
     public void valueChanged(FunctionId func, InputState value, double tpf) {
         if (func == VarChimp.F_OPENWINDOW && value != InputState.Off) {
@@ -108,7 +149,7 @@ public class VarChimpAppState extends BaseAppState implements StateFunctionListe
         }
     }
     
-    private void initVariable(Variable variable, boolean pull) {
+    private void initVariable(Variable variable) {
         VariableContainerFactory factory = getFactory(variable);
         if (factory == null) {
             LOG.log(Level.WARNING, "Variable has no corresponding factory!");
@@ -120,14 +161,13 @@ public class VarChimpAppState extends BaseAppState implements StateFunctionListe
         variables.add(variable);
         VariableContainer container = factory.create(variable);
         containers.add(container);
-        container.initialize(pull);
+        container.initialize();
         varLayout.addChild(container);
         container.getReference().update();
     }
     private void cleanupVariable(Variable variable) {
-        if (!variables.remove(variable)) return;
         VariableContainer container = getVariableContainer(variable);
-        if (!containers.remove(container)) return;
+        if (container == null || !containers.remove(container)) return;
         varList.detachChild(container);
     }
     private VariableContainerFactory getFactory(Variable variable) {
@@ -139,6 +179,15 @@ public class VarChimpAppState extends BaseAppState implements StateFunctionListe
         return null;
     }
     
+    private void initGlobalButtons() {
+        Container buttons = gui.addChild(new Container());
+        BoxLayout layout = new BoxLayout(Axis.X, FillMode.Even);
+        buttons.setLayout(layout);
+        Button push = layout.addChild(new Button("Push All"));
+        push.addClickCommands(new PushPullCommand(true));
+        Button pull = layout.addChild(new Button("Pull All"));
+        pull.addClickCommands(new PushPullCommand(false));
+    }
     private void openPopup() {
         if (popupOpen) return;
         getState(PopupState.class).showModalPopup(gui, (PopupState source) -> {
@@ -155,16 +204,21 @@ public class VarChimpAppState extends BaseAppState implements StateFunctionListe
     }
     private void setPopupAsClosed() {
         popupOpen = false;
-    }
-    public VariableContainer getVariableContainer(Variable variable) {
-        return containers.stream().filter(c -> c.getVariable() == variable).findAny().orElse(null);
-    }
+    }    
     
+    /**
+     * Push changes from the GUI to the variable.
+     */
     public void pushChanges() {
         containers.stream().filter(f -> f.getReference().update()).forEach(f -> {
             f.pushValue();
         });
     }
+    /**
+     * Pull changes from the GUI to the variable.
+     * Actually pulls all values even if they haven't been changed, which is fine,
+     * if a little inefficient.
+     */
     public void pullChanges() {
         containers.stream().forEach(f -> {
             f.pullValue();
@@ -172,23 +226,82 @@ public class VarChimpAppState extends BaseAppState implements StateFunctionListe
         });
     }
     
+    /**
+     * Register the given variable if it is not currently registered already.
+     * @param variable 
+     */
     public void register(Variable variable) {
-        register(variable, true);
-    }
-    public void register(Variable variable, boolean pull) {
         if (!variables.contains(variable)) {
-            if (isInitialized()) initVariable(variable, pull);
+            if (isInitialized()) initVariable(variable);
             else preInitVars.add(variable);
         }
     }
+    /**
+     * Register all given variables if they are not currently registered already.
+     * @param variables 
+     */
     public void registerAll(Variable... variables) {
         for (Variable f : variables) {
-            register(f, true);
+            register(f);
         }
-    } 
-    
+    }
+    /**
+     * Returns a stream containing all members of the given group.
+     * @param group
+     * @return 
+     */
     public Stream<Variable> streamGroup(String group) {
         return variables.stream().filter(v -> group.equals(v.getVariableGroup()));
+    }
+    /**
+     * Removes (unregisters) the variable.
+     * @param variable
+     * @return true if the variable was previously registered
+     */
+    public boolean remove(Variable variable) {
+        if (variables.remove(variable)) {
+            cleanupVariable(variable);
+            return true;
+        }
+        return false;
+    }
+    /**
+     * Removes all variables satisfying the Function.
+     * @param test 
+     */
+    public void removeAllMatching(Function<Variable, Boolean> test) {
+        LinkedList<Variable> remove = new LinkedList<>();
+        for (Variable v : variables) {
+            if (test.apply(v)) {
+                remove.add(v);
+            }
+        }
+        for (Variable v : remove) {
+            cleanupVariable(v);
+            remove.remove(v);
+        }
+    }
+    /**
+     * Removes all members of the group.
+     * @param group 
+     */
+    public void removeGroup(String group) {
+        removeAllMatching(v -> group.equals(v.getVariableGroup()));
+    }
+    /**
+     * Clears all variables.
+     */
+    public void clear() {
+        variables.stream().forEach(v -> cleanupVariable(v));
+        variables.clear();
+    }
+    
+    /**
+     * Adds the given cache to the cache list.
+     * @param cache 
+     */
+    public void addCache(CachedVariableGroup cache) {
+        
     }
     /**
      * Create and store a cache of all variables in the given group.
@@ -227,8 +340,6 @@ public class VarChimpAppState extends BaseAppState implements StateFunctionListe
     /**
      * Applies all the variables in the cache (of the given group).
      * Removes the cache by default, so that all variables stored in the cache are lost.
-     * This is the best practice, since the cache now stores basically redundent information
-     * and there might be collision between similar variables.
      * @param group
      * @param subject
      * @return the applied cache
@@ -312,38 +423,62 @@ public class VarChimpAppState extends BaseAppState implements StateFunctionListe
         caches.clear();
     }
     
-    public boolean remove(Variable variable) {
-        return variables.remove(variable);
-    }
-    public void removeAllMatching(Function<Variable, Boolean> test) {
-        LinkedList<Variable> remove = new LinkedList<>();
-        for (Variable v : variables) {
-            if (test.apply(v)) {
-                remove.add(v);
-            }
-        }
-        for (Variable v : remove) {
-            cleanupVariable(v);
-        }
-    }
-    public void removeGroup(String group) {
-        removeAllMatching(v -> group.equals(v.getVariableGroup()));
-    }
-    public void clear() {
-        variables.clear();
-    }
-    
+    /**
+     * Sets the default group all variables with no group are added to
+     * on registration.
+     * @param group 
+     */
     public void setDefaultGroup(String group) {
         currentDefaultGroup = group;
     }
     
+    /**
+     * Fetch the variable container pertaining to the given variable.
+     * @param variable
+     * @return 
+     */
+    public VariableContainer getVariableContainer(Variable variable) {
+        return containers.stream().filter(c -> c.getVariable() == variable).findAny().orElse(null);
+    }
+    /**
+     * Get the default group which all variables with no group (on registration) are added to.
+     * @return 
+     */
+    public String getDefaultGroup() {
+        return currentDefaultGroup;
+    }
+    
+    /**
+     * Registers the container factory at the end of the factory queue.
+     * @param factory 
+     */
     public void registerFactory(VariableContainerFactory factory) {
         factories.add(factory);
     }
+    /**
+     * Registers all given container factories at the end of the factory queue.
+     * @param factories 
+     */
     public void registerAllFactories(VariableContainerFactory... factories) {
         for (VariableContainerFactory f : factories) {
             registerFactory(f);
         }
+    }
+    
+    
+    private final class PushPullCommand implements Command<Button> {
+        
+        private boolean push;
+        
+        public PushPullCommand(boolean push) {
+            this.push = push;
+        }
+        
+        @Override
+        public void execute(Button source) {
+            if (push) pushChanges();
+            else pullChanges();
+        }        
     }
     
 }

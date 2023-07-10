@@ -11,13 +11,18 @@ import com.simsilica.lemur.component.SpringGridLayout;
 import codex.varchimp.Variable;
 
 /**
- *
+ * Displays GUI for editing {@code Vector3f}.
+ * 
  * @author gary
  */
 public class Vector3fContainer extends VariableContainer<Vector3f> {
     
     NumberScroller x, y, z;
     
+    /**
+     *
+     * @param variable
+     */
     public Vector3fContainer(Variable<Vector3f> variable) {
         super(variable);
     }

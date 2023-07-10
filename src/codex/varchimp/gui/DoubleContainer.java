@@ -7,13 +7,18 @@ package codex.varchimp.gui;
 import codex.varchimp.Variable;
 
 /**
- *
+ * Displays GUI for editing double values.
+ * 
  * @author gary
  */
 public class DoubleContainer extends VariableContainer<Double> {
     
     NumberScroller scroller;
     
+    /**
+     *
+     * @param variable
+     */
     public DoubleContainer(Variable variable) {
         super(variable);
     }

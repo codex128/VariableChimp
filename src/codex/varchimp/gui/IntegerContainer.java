@@ -8,13 +8,18 @@ import com.simsilica.lemur.RangedValueModel;
 import codex.varchimp.Variable;
 
 /**
- *
+ * Displays GUI for editing int values.
+ * 
  * @author gary
  */
 public class IntegerContainer extends VariableContainer<Integer> {
     
     NumberScroller scroller;
     
+    /**
+     *
+     * @param field
+     */
     public IntegerContainer(Variable<Integer> field) {
         super(field);
     }

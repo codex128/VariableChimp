@@ -9,7 +9,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- *
+ * Pushing that directly accesses and sets a field belonging to the user's subject.
+ * 
  * @author gary
  * @param <T>
  */
@@ -17,10 +18,18 @@ public class FieldPush <T> extends Push<T> {
     
     Field field;
     
+    /**
+     *
+     * @param setter
+     */
     public FieldPush(String setter) {
         super(setter);
     }
     
+    /**
+     *
+     * @param user
+     */
     @Override
     public void setUser(Variable<T> user) {
         super.setUser(user);
@@ -36,6 +45,11 @@ public class FieldPush <T> extends Push<T> {
             }
         }
     }    
+
+    /**
+     *
+     * @param value
+     */
     @Override
     public void push(T value) {
         if (user == null) return;

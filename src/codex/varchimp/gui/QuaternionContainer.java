@@ -11,17 +11,25 @@ import com.simsilica.lemur.component.SpringGridLayout;
 import codex.varchimp.Variable;
 
 /**
- *
+ * Displays GUI for editing {@code Quaternions}.
+ * 
  * @author gary
  */
 public class QuaternionContainer extends VariableContainer<Quaternion> {
     
     NumberScroller x, y, z;
     
+    /**
+     *
+     * @param variable
+     */
     public QuaternionContainer(Variable<Quaternion> variable) {
         super(variable);
     }
     
+    /**
+     *
+     */
     @Override
     protected void initEditingGui() {
         SpringGridLayout layout = new SpringGridLayout();
@@ -43,6 +51,11 @@ public class QuaternionContainer extends VariableContainer<Quaternion> {
                 y.getModel().createReference(),
                 z.getModel().createReference()));
     }
+
+    /**
+     *
+     * @param value
+     */
     @Override
     protected void pull(Quaternion value) {
         float[] angles = value.toAngles(new float[3]);
@@ -50,6 +63,11 @@ public class QuaternionContainer extends VariableContainer<Quaternion> {
         y.getModel().setValue(angles[1]);
         z.getModel().setValue(angles[2]);
     }
+
+    /**
+     *
+     * @return
+     */
     @Override
     protected Quaternion push() {
         return new Quaternion().fromAngles(
@@ -57,10 +75,21 @@ public class QuaternionContainer extends VariableContainer<Quaternion> {
                 (float)y.getModel().getValue(),
                 (float)z.getModel().getValue());
     }
+
+    /**
+     *
+     * @return
+     */
     @Override
     public Class getVariableType() {
         return Quaternion.class;
     }
+
+    /**
+     *
+     * @param field
+     * @return
+     */
     @Override
     public VariableContainer create(Variable field) {
         return new QuaternionContainer(field);

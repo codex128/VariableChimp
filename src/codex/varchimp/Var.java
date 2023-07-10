@@ -5,7 +5,8 @@
 package codex.varchimp;
 
 /**
- *
+ * Default implementation of Variable.
+ * 
  * @author gary
  * @param <T>
  */
@@ -17,6 +18,11 @@ public class Var <T> implements Variable<T> {
     private final Pull<T> getter;
     private final Push<T> setter;
     
+    public Var(Class<T> type, String fieldname) {
+        this.type = type;
+        getter = new FieldPull(fieldname);
+        setter = new FieldPush(fieldname);
+    }
     public Var(Object subject, Class<T> type, String fieldname) {
         this(subject, type, new FieldPull(fieldname), new FieldPush(fieldname));
     }
@@ -45,6 +51,11 @@ public class Var <T> implements Variable<T> {
         getter.setUser(this);
         setter.setUser(this);
     }
+    
+    /**
+     * Sets the subject.
+     * @param subject 
+     */
     public void setSubject(Object subject) {
         this.subject = subject;
     }
@@ -80,9 +91,28 @@ public class Var <T> implements Variable<T> {
     public Var copy(Object subject) {
         return new Var(group, subject, type, getter, setter);
     }
+
+    /**
+     *
+     * @return
+     */
     @Override
     public String toString() {
         return getClass().getSimpleName()+"["+getPusher().getSetterName()+"]";
+    }    
+    
+    public static Var[] create(String group, Var... vars) {
+        for (Var v : vars) {
+            v.group = group;
+        }
+        return vars;
+    }
+    public static Var[] create(String group, Object subject, Var... vars) {
+        for (Var v : vars) {
+            v.group = group;
+            v.subject = subject;
+        }
+        return vars;
     }
     
 }
