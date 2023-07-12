@@ -6,7 +6,6 @@ package codex.varchimp;
 
 import codex.varchimp.gui.VariableContainer;
 import com.jme3.app.Application;
-import com.jme3.app.state.BaseAppState;
 import com.simsilica.lemur.Container;
 import com.simsilica.lemur.GuiGlobals;
 import java.util.LinkedList;
@@ -23,6 +22,7 @@ import com.simsilica.lemur.input.FunctionId;
 import com.simsilica.lemur.input.InputMapper;
 import com.simsilica.lemur.input.InputState;
 import com.simsilica.lemur.input.StateFunctionListener;
+import java.util.Iterator;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -35,7 +35,7 @@ import java.util.stream.Stream;
  * 
  * @author gary
  */
-public class VariableManipulatorState extends BaseAppState implements StateFunctionListener {
+public class VariableManipulatorState extends VarChimpAppState implements StateFunctionListener {
     
     private static final Logger LOG = Logger.getLogger(VariableManipulatorState.class.getName());
     
@@ -45,9 +45,8 @@ public class VariableManipulatorState extends BaseAppState implements StateFunct
     private LinkedList<VariableContainer> containers = new LinkedList<>();
     private LinkedList<VariableContainerFactory> factories = new LinkedList<>();
     private LinkedList<CachedVariableGroup> caches = new LinkedList<>();
-    private LinkedList<VarChimpListener> listeners = new LinkedList<>();
     private GuiDisplayState guiRoot;
-    private Node scene = new Node("varchimp-tool-scene");
+    private Node scene = new Node("varchimp[varManipulationScene]");
     private Container gui = new Container();
     private Container varList = new Container();
     private BoxLayout varLayout;
@@ -90,7 +89,7 @@ public class VariableManipulatorState extends BaseAppState implements StateFunct
      * @param app
      */
     @Override
-    protected void cleanup(Application app) {
+    protected void stateCleanup(Application app) {
         clear();
         containers.clear();
         factories.clear();
@@ -104,20 +103,18 @@ public class VariableManipulatorState extends BaseAppState implements StateFunct
      *
      */
     @Override
-    protected void onEnable() {
+    protected void stateEnabled() {
         guiRoot.enableGui();
         guiRoot.getGuiRoot().attachChild(scene);
         pullChanges();
         GuiGlobals.getInstance().requestCursorEnabled(this);
         GuiGlobals.getInstance().requestFocus(scene);
-        listeners.stream().forEach(l -> l.onVarChimpEnabled());
     }
     /**
      *
      */
     @Override
-    protected void onDisable() {
-        listeners.stream().forEach(l -> l.onVarChimpDisabled());
+    protected void stateDisabled() {
         scene.removeFromParent();
         guiRoot.releaseGui();
         GuiGlobals.getInstance().releaseCursorEnabled(this);
@@ -163,8 +160,7 @@ public class VariableManipulatorState extends BaseAppState implements StateFunct
             }
         }
         return null;
-    }
-    
+    }    
     private void initGlobalButtons() {
         Container buttons = gui.addChild(new Container());
         BoxLayout layout = new BoxLayout(Axis.X, FillMode.Even);
@@ -239,15 +235,12 @@ public class VariableManipulatorState extends BaseAppState implements StateFunct
      * @param test 
      */
     public void removeAllMatching(Function<Variable, Boolean> test) {
-        LinkedList<Variable> remove = new LinkedList<>();
-        for (Variable v : variables) {
+        for (Iterator<Variable> it = variables.iterator(); it.hasNext();) {
+            Variable v = it.next();
             if (test.apply(v)) {
-                remove.add(v);
+                cleanupVariable(v);
+                it.remove();
             }
-        }
-        for (Variable v : remove) {
-            cleanupVariable(v);
-            remove.remove(v);
         }
     }
     /**
@@ -371,6 +364,15 @@ public class VariableManipulatorState extends BaseAppState implements StateFunct
         return c;
     }
     /**
+     * Removes each cache corresponding with each group name.
+     * @param groups 
+     */
+    public void removeCaches(String... groups) {
+        for (String g : groups) {
+            removeCache(g);
+        }
+    }
+    /**
      * Removes the given cache.
      * All variables in the cache will be lost, unless they were (for some reason)
      * not removed from the update list when the cache was created.
@@ -449,16 +451,6 @@ public class VariableManipulatorState extends BaseAppState implements StateFunct
         for (VariableContainerFactory f : factories) {
             registerFactory(f);
         }
-    }
-    
-    public void addListener(VarChimpListener listener) {
-        listeners.add(listener);
-    }
-    public boolean removeListener(VarChimpListener listener) {
-        return listeners.remove(listener);
-    }
-    public void clearAllListeners() {
-        listeners.clear();
     }
     
     

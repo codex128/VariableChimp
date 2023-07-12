@@ -4,13 +4,17 @@
  */
 package codex.varchimp;
 
+import com.jme3.app.state.AppState;
+
 /**
  *
  * @author gary
  */
 public interface VarChimpListener {
     
-    public void onVarChimpEnabled();
-    public void onVarChimpDisabled();
+    public void onStateEnabled(AppState state);
+    public void onStateDisabled(AppState state);
+    public void onGuiEnabled();
+    public void onGuiDisabled();
     
 }

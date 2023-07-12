@@ -5,7 +5,6 @@
 package codex.varchimp;
 
 import com.jme3.app.Application;
-import com.jme3.app.state.BaseAppState;
 import com.jme3.material.Material;
 import com.jme3.material.RenderState;
 import com.jme3.math.ColorRGBA;
@@ -30,7 +29,7 @@ import java.awt.Point;
  *
  * @author gary
  */
-public class GuiDisplayState extends BaseAppState {
+public class GuiDisplayState extends VarChimpAppState {
     
     public static final String
             VC_PICK_LAYER = "varchimp-pick-layer",
@@ -49,7 +48,7 @@ public class GuiDisplayState extends BaseAppState {
         windowSize = new Point(app.getContext().getSettings().getWidth(),
                 app.getContext().getSettings().getHeight());
         
-        root = new Node("varchimp-gui-root");
+        root = new Node("varchimp[guiRoot]");
         root.setCullHint(Spatial.CullHint.Never);
         root.setQueueBucket(RenderQueue.Bucket.Gui);
         root.addControl(new CursorEventControl());
@@ -60,11 +59,11 @@ public class GuiDisplayState extends BaseAppState {
         
     }
     @Override
-    protected void cleanup(Application app) {}
+    protected void stateCleanup(Application app) {}
     @Override
-    protected void onEnable() {}
+    protected void stateEnabled() {}
     @Override
-    protected void onDisable() {}
+    protected void stateDisabled() {}
     @Override
     public void update(float tpf) {
         if (vp != null) {
@@ -79,6 +78,7 @@ public class GuiDisplayState extends BaseAppState {
             InputMapper im = GuiGlobals.getInstance().getInputMapper();
             im.activateGroup(VarChimp.PASSIVE_INPUT);
             root.attachChild(createBackgroundBlocker(-10f, null));
+            listeners.stream().forEach(l -> l.onGuiEnabled());
         }
     }
     public void releaseGui() {
@@ -88,6 +88,7 @@ public class GuiDisplayState extends BaseAppState {
             im.deactivateGroup(VarChimp.PASSIVE_INPUT);
             root.detachChildNamed(BACKGROUND_NAME);
             usage = 0;
+            listeners.stream().forEach(l -> l.onGuiDisabled());
         }
     }
     public int getNumGuiUsers() {
