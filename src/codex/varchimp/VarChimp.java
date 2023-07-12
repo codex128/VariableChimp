@@ -19,10 +19,11 @@ import com.simsilica.lemur.input.InputMapper;
  */
 public class VarChimp {
     
-    private static VarChimpAppState instance;
+    private static GuiDisplayState guiRoot;
+    private static VariableManipulatorState instance;
     
     /**
-     *
+     * The version of VariableChimp used.
      */
     public static final String VERSION = "v0.1.8";
     
@@ -40,16 +41,10 @@ public class VarChimp {
         new QuaternionContainer(null),
     };
 
-    /**
-     *
-     */
     public static final String
             ACTIVE_INPUT = "VarChimp-activeinput",
             PASSIVE_INPUT = "VarChimp-passiveinput";
 
-    /**
-     *
-     */
     public static final FunctionId
             F_OPENWINDOW = new FunctionId(ACTIVE_INPUT, "open-window"),
             F_SCROLL = new FunctionId(PASSIVE_INPUT, "scroll");
@@ -67,7 +62,9 @@ public class VarChimp {
             throw new NullPointerException("Lemur GUI context not started!");
         }
         initInputMappings(GuiGlobals.getInstance().getInputMapper());
-        instance = new VarChimpAppState();
+        guiRoot = new GuiDisplayState();
+        app.getStateManager().attach(guiRoot);
+        instance = new VariableManipulatorState();
         instance.registerAllFactories(DEF_FACTORIES);
         app.getStateManager().attach(instance);
     }
@@ -75,6 +72,22 @@ public class VarChimp {
         im.map(F_OPENWINDOW, key_openwindow);
         im.map(F_SCROLL, MouseInput.AXIS_WHEEL);
     }
+    
+    /**
+     * Get the {@code VariableManipulatorState} instance for this context.
+     * @return 
+     */
+    public static VariableManipulatorState get() {
+        return instance;
+    }
+    /**
+     * Get the {@code GuiDisplayState} instance for this context.
+     * @return 
+     */
+    public static GuiDisplayState getGuiRoot() {
+        return guiRoot;
+    }
+    
     /**
      * Returns true if the context has been started.
      * @return context started
@@ -90,15 +103,7 @@ public class VarChimp {
      */
     public static boolean stateInitialized() {
         return instance.isInitialized();
-    }
-    
-    /**
-     * Get the {@code VarChimpAppState} instance for this context.
-     * @return 
-     */
-    public static VarChimpAppState get() {
-        return instance;
-    }
+    }    
     
     /**
      * Sets the keyboard input which opens the VariableChimp window.

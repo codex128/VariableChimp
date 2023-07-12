@@ -7,30 +7,18 @@ package codex.varchimp;
 import codex.varchimp.gui.VariableContainer;
 import com.jme3.app.Application;
 import com.jme3.app.state.BaseAppState;
-import com.jme3.math.ColorRGBA;
-import com.jme3.math.Vector2f;
 import com.simsilica.lemur.Container;
 import com.simsilica.lemur.GuiGlobals;
 import java.util.LinkedList;
 import java.util.logging.Logger;
 import java.util.logging.Level;
 import codex.varchimp.gui.VariableContainerFactory;
-import com.jme3.app.SimpleApplication;
-import com.jme3.material.Material;
-import com.jme3.material.RenderState;
-import com.jme3.renderer.ViewPort;
-import com.jme3.renderer.queue.RenderQueue;
-import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
-import com.jme3.scene.Spatial;
-import com.jme3.scene.shape.Quad;
 import com.simsilica.lemur.Axis;
 import com.simsilica.lemur.Button;
 import com.simsilica.lemur.Command;
 import com.simsilica.lemur.FillMode;
 import com.simsilica.lemur.component.BoxLayout;
-import com.simsilica.lemur.core.GuiMaterial;
-import com.simsilica.lemur.core.UnshadedMaterialAdapter;
 import com.simsilica.lemur.input.FunctionId;
 import com.simsilica.lemur.input.InputMapper;
 import com.simsilica.lemur.input.InputState;
@@ -47,9 +35,9 @@ import java.util.stream.Stream;
  * 
  * @author gary
  */
-public class VarChimpAppState extends BaseAppState implements StateFunctionListener {
+public class VariableManipulatorState extends BaseAppState implements StateFunctionListener {
     
-    private static final Logger LOG = Logger.getLogger(VarChimpAppState.class.getName());
+    private static final Logger LOG = Logger.getLogger(VariableManipulatorState.class.getName());
     
     private LinkedList<Variable>
             variables = new LinkedList<>(),
@@ -58,21 +46,17 @@ public class VarChimpAppState extends BaseAppState implements StateFunctionListe
     private LinkedList<VariableContainerFactory> factories = new LinkedList<>();
     private LinkedList<CachedVariableGroup> caches = new LinkedList<>();
     private LinkedList<VarChimpListener> listeners = new LinkedList<>();
-    private ViewPort[] vps;
-    private Node node = new Node("varchimp-master-node");
+    private GuiDisplayState guiRoot;
+    private Node scene = new Node("varchimp-tool-scene");
     private Container gui = new Container();
     private Container varList = new Container();
     private BoxLayout varLayout;
-    private Vector2f windowSize;
-    private GuiMaterial backgroundMat;
     private String currentDefaultGroup = "varchimp-group";
-    private boolean cursorLocked = false;
-    private boolean popupOpen = false;
     
     /**
      *
      */
-    public VarChimpAppState() {
+    public VariableManipulatorState() {
         setEnabled(false);
     }
     
@@ -83,30 +67,18 @@ public class VarChimpAppState extends BaseAppState implements StateFunctionListe
     @Override
     protected void initialize(Application app) {
         
-        windowSize = new Vector2f(app.getContext().getSettings().getWidth(),
-                app.getContext().getSettings().getHeight());
+        guiRoot = VarChimp.getGuiRoot();
         
-        if (app instanceof SimpleApplication) {
-            vps = new ViewPort[]{((SimpleApplication)app).getGuiViewPort()};
-        }
-        else {
-            LOG.log(Level.INFO, "VariableChimp is unable to find the GUI view port. Must be set manually.");
-            vps = new ViewPort[0];
-        }
-        
-        node.setLocalTranslation(0f, 0f, 20f);
-        node.setCullHint(Spatial.CullHint.Never);
-        node.setQueueBucket(RenderQueue.Bucket.Gui);
-        node.attachChild(createBackgroundBlocker(-10f, new ColorRGBA(0f, 0f, 0f, .7f)));
-        node.attachChild(gui);
+        scene.setLocalTranslation(0f, 0f, 0f);
+        scene.attachChild(gui);
         initGlobalButtons();
-        gui.addChild(varList);
-        gui.setLocalTranslation(0f, windowSize.y, 0f);
         varLayout = new BoxLayout();
-        varList.setLayout(varLayout);
+        gui.addChild(varList).setLayout(varLayout);
+        gui.setLocalTranslation(0f, guiRoot.getWindowSize().y, 0f);
         
         preInitVars.stream().forEach(v -> initVariable(v));
         preInitVars.clear();
+        preInitVars = null;
         
         InputMapper im = GuiGlobals.getInstance().getInputMapper();
         im.addStateListener(this, VarChimp.F_OPENWINDOW);
@@ -133,12 +105,11 @@ public class VarChimpAppState extends BaseAppState implements StateFunctionListe
      */
     @Override
     protected void onEnable() {
-        openPopup();
+        guiRoot.enableGui();
+        guiRoot.getGuiRoot().attachChild(scene);
         pullChanges();
-        InputMapper im = GuiGlobals.getInstance().getInputMapper();
-        im.activateGroup(VarChimp.PASSIVE_INPUT);
-        cursorLocked = !GuiGlobals.getInstance().isCursorEventsEnabled();
-        GuiGlobals.getInstance().setCursorEventsEnabled(true);
+        GuiGlobals.getInstance().requestCursorEnabled(this);
+        GuiGlobals.getInstance().requestFocus(scene);
         listeners.stream().forEach(l -> l.onVarChimpEnabled());
     }
     /**
@@ -147,20 +118,9 @@ public class VarChimpAppState extends BaseAppState implements StateFunctionListe
     @Override
     protected void onDisable() {
         listeners.stream().forEach(l -> l.onVarChimpDisabled());
-        pushChanges();
-        closePopup();
-        InputMapper im = GuiGlobals.getInstance().getInputMapper();
-        im.deactivateGroup(VarChimp.PASSIVE_INPUT);
-        GuiGlobals.getInstance().setCursorEventsEnabled(!cursorLocked);
-    }
-    /**
-     *
-     * @param tpf
-     */
-    @Override
-    public void update(float tpf) {
-        node.updateLogicalState(tpf);
-        node.updateGeometricState();
+        scene.removeFromParent();
+        guiRoot.releaseGui();
+        GuiGlobals.getInstance().releaseCursorEnabled(this);
     }
     /**
      *
@@ -205,23 +165,6 @@ public class VarChimpAppState extends BaseAppState implements StateFunctionListe
         return null;
     }
     
-    private Geometry createBackgroundBlocker(float z, ColorRGBA color) {
-        Geometry blocker = new Geometry("background-blocker", new Quad(windowSize.x, windowSize.y));        
-        blocker.setMaterial(createBackgroundMaterial(color).getMaterial());
-        blocker.setLocalTranslation(0f, 0f, z);
-        return blocker;
-    }
-    private GuiMaterial createBackgroundMaterial(ColorRGBA color) {
-        if (backgroundMat != null) {
-            return backgroundMat;
-        }
-        backgroundMat = new UnshadedMaterialAdapter(new Material(getApplication().getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md"));
-        backgroundMat.setColor(color);
-        backgroundMat.getMaterial().getAdditionalRenderState().setBlendMode(RenderState.BlendMode.Alpha);
-        backgroundMat.getMaterial().setTransparent(true);
-        backgroundMat.getMaterial().getAdditionalRenderState().setFaceCullMode(RenderState.FaceCullMode.Off);
-        return backgroundMat;
-    }
     private void initGlobalButtons() {
         Container buttons = gui.addChild(new Container());
         BoxLayout layout = new BoxLayout(Axis.X, FillMode.Even);
@@ -231,42 +174,24 @@ public class VarChimpAppState extends BaseAppState implements StateFunctionListe
         Button pull = layout.addChild(new Button("Pull All"));
         pull.addClickCommands(new PushPullCommand(false));
     }
-    private void openPopup() {
-        if (popupOpen) return;
-        for (ViewPort v : vps) {
-            v.attachScene(node);
-        }
-        popupOpen = true;
-    }
-    private void closePopup() {
-        if (popupOpen) {
-            for (ViewPort v : vps) {
-                v.detachScene(node);
-            }
-            setPopupAsClosed();
-        }
-    }
-    private void setPopupAsClosed() {
-        popupOpen = false;
-    }
     
     /**
      * Push changes from the GUI to the variable.
      */
     public void pushChanges() {
-        containers.stream().filter(f -> f.getReference().update()).forEach(f -> {
-            f.pushValue();
+        containers.stream().filter(v -> v.getReference().update()).forEach(v -> {
+            v.pushValue();
         });
     }
     /**
-     * Pull changes from the GUI to the variable.
-     * Actually pulls all values even if they haven't been changed, which is fine,
-     * if a little inefficient.
+     * Pull values from the variable to the GUI.
+     * <p>Pulls all values regardless if they have been changed or not.
+     * Tracking variable changes was considered far more inefficient and clunky.
      */
     public void pullChanges() {
-        containers.stream().forEach(f -> {
-            f.pullValue();
-            f.getReference().update();
+        containers.stream().forEach(v -> {
+            v.pullValue();
+            v.getReference().update();
         });
     }
     
@@ -468,34 +393,12 @@ public class VarChimpAppState extends BaseAppState implements StateFunctionListe
     }
     
     /**
-     * Sets the viewports that render the GUI.
-     * @param vps 
-     */
-    public void setViewPorts(ViewPort... vps) {
-        assert vps != null;
-        if (this.vps != null && popupOpen) for (ViewPort v : this.vps) {
-            v.detachScene(node);
-        }
-        this.vps = vps;
-        if (popupOpen) for (ViewPort v : this.vps) {
-            v.attachScene(node);
-        }
-    }
-    /**
      * Sets the default group all variables with no group are added to
      * on registration.
      * @param group 
      */
     public void setDefaultGroup(String group) {
         currentDefaultGroup = group;
-    }
-    /**
-     * Set the background color.
-     * @param color 
-     */
-    public void setBackgroundColor(ColorRGBA color) {
-        if (backgroundMat == null) createBackgroundMaterial(color);
-        else backgroundMat.setColor(color);
     }
     /**
      * Set the z position of the gui scene.
@@ -505,7 +408,7 @@ public class VarChimpAppState extends BaseAppState implements StateFunctionListe
      * @param z 
      */
     public void setZPosition(float z) {
-        node.setLocalTranslation(0f, 0f, z);
+        scene.setLocalTranslation(0f, 0f, z);
     }
     
     /**
@@ -522,6 +425,13 @@ public class VarChimpAppState extends BaseAppState implements StateFunctionListe
      */
     public String getDefaultGroup() {
         return currentDefaultGroup;
+    }
+    /**
+     * Get the z position of the gui scene.
+     * @return 
+     */
+    public float getZPosition() {
+        return scene.getLocalTranslation().z;
     }
     
     /**

@@ -66,9 +66,6 @@ public class Var <T> implements Variable<T> {
     }    
     @Override
     public String getVariableGroup() {
-        if (group == null) {
-            return Variable.super.getVariableGroup();
-        }
         return group;
     }
     @Override
@@ -88,7 +85,7 @@ public class Var <T> implements Variable<T> {
         return setter;
     }
     @Override
-    public Var copy(Object subject) {
+    public Var<T> copy(Object subject) {
         return new Var(group, subject, type, getter, setter);
     }
 
