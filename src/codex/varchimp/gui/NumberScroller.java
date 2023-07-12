@@ -27,26 +27,11 @@ import com.simsilica.lemur.style.Styles;
  */
 public class NumberScroller extends Panel {
     
-    /**
-     *
-     */
-    public static final String
+    public static final String 
             ELEMENT_ID = "number-scroller",
-
-    /**
-     *
-     */
-    INCREMENT_ID = "increment.button",
-
-    /**
-     *
-     */
-    DECREMENT_ID = "decrement.button",
-
-    /**
-     *
-     */
-    RANGE_ID = "range";
+            INCREMENT_ID = "right.button",
+            DECREMENT_ID = "left.button",
+            RANGE_ID = "range";
     
     private final ElementId id;
     private final BorderLayout layout;

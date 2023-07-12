@@ -4,8 +4,10 @@
  */
 package codex.varchimp;
 
+import codex.varchimp.gui.*;
 import com.jme3.app.Application;
 import com.jme3.input.KeyInput;
+import com.jme3.input.MouseInput;
 import com.simsilica.lemur.GuiGlobals;
 import com.simsilica.lemur.input.FunctionId;
 import com.simsilica.lemur.input.InputMapper;
@@ -17,30 +19,35 @@ import com.simsilica.lemur.input.InputMapper;
  */
 public class VarChimp {
     
-    private static VarChimpAppState instance;
-    private static VarChimpInitializer initializer = VarChimpInitializer.DEFAULT;
+    private static GuiDisplayState guiRoot;
+    private static VariableManipulatorState instance;
     
     /**
-     *
+     * The version of VariableChimp used.
      */
-    public static final String VERSION = "v0.7";
-
+    public static final String VERSION = "v0.1.8";
+    
     /**
-     *
+     * Array of all factory containers that ship with VariableChimp.
      */
+    public static final VariableContainerFactory[]
+    DEF_FACTORIES = {
+        new FloatContainer(null),
+        new IntegerContainer(null),
+        new DoubleContainer(null),
+        new LongContainer(null),
+        new StringContainer(null),
+        new Vector3fContainer(null),
+        new QuaternionContainer(null),
+    };
+
     public static final String
             ACTIVE_INPUT = "VarChimp-activeinput",
+            PASSIVE_INPUT = "VarChimp-passiveinput";
 
-    /**
-     *
-     */
-    PASSIVE_INPUT = "VarChimp-passiveinput";
-
-    /**
-     *
-     */
     public static final FunctionId
-            F_OPENWINDOW = new FunctionId(ACTIVE_INPUT, "start-context");
+            F_OPENWINDOW = new FunctionId(ACTIVE_INPUT, "open-window"),
+            F_SCROLL = new FunctionId(PASSIVE_INPUT, "scroll");
     private static int
             key_openwindow = KeyInput.KEY_F1;
     
@@ -55,26 +62,32 @@ public class VarChimp {
             throw new NullPointerException("Lemur GUI context not started!");
         }
         initInputMappings(GuiGlobals.getInstance().getInputMapper());
-        instance = new VarChimpAppState();
-        initializer.initialize(app, instance);
+        guiRoot = new GuiDisplayState();
+        app.getStateManager().attach(guiRoot);
+        instance = new VariableManipulatorState();
+        instance.registerAllFactories(DEF_FACTORIES);
         app.getStateManager().attach(instance);
-    }
-    /**
-     * Sets the initializer responsible for initializing certain parts of startup.
-     * @param init 
-     */
-    public static void setInitializer(VarChimpInitializer init) {
-        assert init != null;
-        if (contextStarted()) {
-            System.out.println("Redundent setting of VarChimp initializer: context already started.");
-        }
-        else {
-            initializer = init;
-        }
     }
     private static void initInputMappings(InputMapper im) {
         im.map(F_OPENWINDOW, key_openwindow);
+        im.map(F_SCROLL, MouseInput.AXIS_WHEEL);
     }
+    
+    /**
+     * Get the {@code VariableManipulatorState} instance for this context.
+     * @return 
+     */
+    public static VariableManipulatorState get() {
+        return instance;
+    }
+    /**
+     * Get the {@code GuiDisplayState} instance for this context.
+     * @return 
+     */
+    public static GuiDisplayState getGuiRoot() {
+        return guiRoot;
+    }
+    
     /**
      * Returns true if the context has been started.
      * @return context started
@@ -82,14 +95,15 @@ public class VarChimp {
     public static boolean contextStarted() {
         return instance != null;
     }
-    
     /**
-     * Get the VarChimpAppState instance for this context.
+     * Returns true if the state has been initialized.
+     * <p>This differs from VarChimp being initialized, since states are
+     * initialized on the next update.
      * @return 
      */
-    public static VarChimpAppState get() {
-        return instance;
-    }
+    public static boolean stateInitialized() {
+        return instance.isInitialized();
+    }    
     
     /**
      * Sets the keyboard input which opens the VariableChimp window.

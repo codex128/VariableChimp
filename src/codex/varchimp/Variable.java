@@ -44,6 +44,13 @@ public interface Variable <T> {
      * @param group 
      */
     public void setVariableGroup(String group);
+    /**
+     * Returns a string representing which group this variable belongs to.
+     * Used generally used to group variables together that will be removed
+     * in the same time.
+     * @return 
+     */
+    public String getVariableGroup();
     
     /**
      * Create a copy for the given subject.
@@ -58,15 +65,6 @@ public interface Variable <T> {
      */
     public default String getVariableLabel() {
         return getPusher().getSetterName();
-    }
-    /**
-     * Returns a string representing which group this variable belongs to.
-     * Used generally used to group variables together that will be removed
-     * in the same time.
-     * @return 
-     */
-    public default String getVariableGroup() {
-        return null;
     }
     /**
      * Pulls the tracked variable's value.

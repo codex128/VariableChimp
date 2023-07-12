@@ -4,7 +4,7 @@
  */
 package codex.varchimp.gui;
 
-import codex.varchimp.CombinedReference;
+import codex.varchimp.util.CombinedReference;
 import com.jme3.math.Vector3f;
 import com.simsilica.lemur.Label;
 import com.simsilica.lemur.component.SpringGridLayout;
