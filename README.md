@@ -1,6 +1,12 @@
 # VariableChimp for JMonkeyEngine3
 VariableChimp allows developers to change fields during runtime using an in-program interface. This can significantly boost development time because programmers would no longer have to restart the program every time they want to tweak a field value.
 
+# Download
+Go ahead and download the latest stable version of VariableChimp from the [releases]().<br>
+You also need to download a couple libraries:
+* [JMonkeyEngine 3.6](https://github.com/jMonkeyEngine/jmonkeyengine)
+* [Lemur 1.16+](https://github.com/jMonkeyEngine-Contributions/Lemur)
+
 # Quick Start
 Initialize VariableChimp using the `VarChimp` class (make sure Lemur's `GuiGlobals` is initialized first).
 ```
@@ -12,7 +18,7 @@ Spatial mySpatial = new Node("my-spatial");
 Variable v = new Var(mySpatial, Vector3f.class, new Pull("getLocalTranslation"), new Push("setLocalTranslation"));
 VarChimp.get().register(v);
 ```
-In the program, press **F1** to toggle the VariableChimp GUI.
+In the program, press **F1** to toggle the VariableChimp GUI. Edit the position of `mySpatial` using the sliders under "setLocalTranslation," then press the "Push" button directly below. Congratulations! You have just changed the position of `mySpatial`!
 
 ### What are `Variable` and `Var`?
 `Variable` is an interface for tracking and updating a field. `Var` is the class implementation of `Variable`.
@@ -25,21 +31,12 @@ In the program, press **F1** to toggle the VariableChimp GUI.
 ### What is pulling?
 Pulling, like the git command, is applying the field value to the GUI, so that the GUI displays whatever the field is. In VariableChimp, the `Pull` class handles the pulling; it takes one argument, a string, which indicates a getter method belonging to the subject that returns the field we want to edit.
 
+So when you press the "Pull" button in the GUI, it fetches the field value from the world and displays it on the GUI.
+
 ### What is pushing?
 Pushing is exactly the opposite of pulling. Instead of applying the field to the GUI, we apply the GUI to the field (so that the field is whatever the GUI displays). The `Push` class handles pushing; it takes one argument, a string, which indicates a setter method belonging to the subject that sets the field we want to edit.
 
-### Direct Field Access
-Normally, `Push` and `Pull` access getters and setters in order to change fields. However, `FieldPull` and `FieldPush` directly access the field of the subject. They each require one string, which should be the exact name of the field.
-
-### Additional, Faster `Var` Constructors
-```
-// edits field through getter and setter
-new Var(myObject, int.class, "getNumber", "setNumber");
-// directly accesses field "num" on both pushes and pulls 
-new Var(myObject, int.class, "num");
-```
-
-# More Advanced Usage
+So when you press the "Push" button in the GUI, it takes the value displayed on the GUI and applies it to the world.
 
 ### Variable Groups
 Putting variables in the same group is a great way to quickly access that set of variables, for whatever you need. The `Var` class has a setter for the group, or you can use a constructor to set it. Variables can change groups at any time.
@@ -50,13 +47,36 @@ variable.setVariableGroup("my-group");
 ```
 Or `Var` has constructors that set the group.
 ```
-Variable v = new Var("my-group", myObject, int.class, "num");
+Variable v = new Var("my-group", myObject, int.class, new Pull("getNumber"), new Push("setNumber"));
 ```
 If you do not set the group of the variable, the default group will be assigned when the variable is registered. Accessing and changing the default group can be done through VarChimp.
 ```
 VarChimp.get().getDefaultGroup();
 VarChimp.get().setDefaultGroup("my-group");
 ```
+
+### Direct Field Access
+Normally, `Push` and `Pull` access getters and setters in order to change fields. However, `FieldPull` and `FieldPush` directly access the field of the subject. They each require one string, which should be the exact name of the field. This can be useful when there aren't getter/setter methods available.
+```
+new Var(myObject, int.class, new FieldPull("num"), new FieldPush("num"));
+```
+
+### Faster ways to create Vars
+Edits field through getter and setter
+```
+new Var(myObject, int.class, "getNumber", "setNumber");
+```
+Directly accesses field "num" on both pushes and pulls 
+```
+new Var(myObject, int.class, "num");
+```
+Applies a group name (and a subject, optionally) to a list of `Vars`.
+```
+Var.create("my-group", new Var(myObject, int.class, "num"), new Var(myObject2, int.class, "num"));
+Var.create("my-group", myObject, new Var(int.class, "num"), new Var(double.class, "score"));
+```
+
+# More Advanced Usage
 
 ### Variable Caching
 VariableChimp allows you to temporarily cache variables, then apply them to a different object. This is useful if you want to apply a group of variables to another subject.
@@ -75,9 +95,5 @@ VarChimp.get().applyCacheOrElse("my-group", myObject, () -> {
     VarChimp.get().register(new Var("my-group", myObject, int.class, "num"));
 });
 ```
-Note that, but default, when you cache a variable it becomes unregistered, and when you apply a cache, it gets removed.
-
-# Dependencies
-* [JMonkeyEngine 3](https://github.com/jMonkeyEngine/jmonkeyengine) (only the latest stable version is being maintained)
-* [Lemur 1.16+](https://github.com/jMonkeyEngine-Contributions/Lemur)
-* JDK 8+
+#### Important!
+By default, whenever you cache a variable, it is automatically unregistered, and whenever you apply a cache, it gets removed.
