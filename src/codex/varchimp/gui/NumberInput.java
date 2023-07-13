@@ -79,7 +79,6 @@ public class NumberInput extends Panel implements AnalogFunctionListener, StateF
     private DeltaModel delta = new DeltaModel(1.0, 0.1);
     private InputType inputType = InputType.NORMAL;
     private double lastValue;
-    private String typedNumber = "";
     private boolean inputListening = false;
     private DoubleClickListener doubleclick;
     private KeyHandler keys;
@@ -125,10 +124,7 @@ public class NumberInput extends Panel implements AnalogFunctionListener, StateF
     public void updateLogicalState(float tpf) {
         super.updateLogicalState(tpf);
         doubleclick.update(tpf);
-        if (inputType == InputType.TYPING) {
-            value.setText(typedNumber);
-        }
-        else if (state == null || state.update()) {
+        if (inputType != InputType.TYPING && (state == null || state.update())) {
             value.setText(""+model.getValue());
             if (inputType == InputType.NORMAL) {
                 lastValue = model.getValue();
@@ -143,12 +139,12 @@ public class NumberInput extends Panel implements AnalogFunctionListener, StateF
     }    
     @Override
     public void valueChanged(FunctionId func, InputState value, double tpf) {
-        if ((func == F_CONFIRM && value != InputState.Off && inputType != InputType.NORMAL) ||
-                func == F_RELEASE && value == InputState.Off && inputType == InputType.DRAGGING) {
-            stopSpecialNumberEntry();
+        if ((func == F_CONFIRM && value != InputState.Off && inputType != InputType.NORMAL)
+                || (func == F_RELEASE && value == InputState.Off && inputType == InputType.DRAGGING)) {
             if (inputType == InputType.TYPING) {
                 model.setValue(parseText());
             }
+            stopSpecialNumberEntry();
         }
         else if (func == F_DENY && value != InputState.Off && inputType != InputType.NORMAL) {
             stopSpecialNumberEntry();
@@ -181,9 +177,9 @@ public class NumberInput extends Panel implements AnalogFunctionListener, StateF
         }
     }
     private void startNumberTyping() {
-        System.out.println("start typing mode");
         inputType = InputType.TYPING;
         lastValue = model.getValue();
+        value.setText("");
     }
     private void startNumberDragging() {
         System.out.println("start dragging mode");
@@ -200,17 +196,15 @@ public class NumberInput extends Panel implements AnalogFunctionListener, StateF
     }
     private void enterCharacter(char c) {
         if (Character.isDigit(c) || c == '.') {
-            System.out.println("accept digit \""+c+"\"");
             value.setText(value.getText()+c);
         }
     }
     private void removeLastCharacter() {
-        System.out.println("remove last character");
         if (value.getText().length() <= 1) {
             value.setText("");
         }
         else {
-            value.setText(value.getText().substring(0, typedNumber.length()-1));
+            value.setText(value.getText().substring(0, value.getText().length()-1));
         }
     }
     private double parseText() {
@@ -246,9 +240,12 @@ public class NumberInput extends Panel implements AnalogFunctionListener, StateF
     private static void initInputMappings(InputMapper im) {
         if (inputInit) return;
         im.map(F_DRAG, Axis.MOUSE_X);
+        im.map(F_CONFIRM, KeyInput.KEY_NUMPADENTER);
         im.map(F_CONFIRM, KeyInput.KEY_RETURN);
+        im.map(F_CONFIRM, KeyInput.KEY_RCONTROL);
         im.map(F_RELEASE, com.simsilica.lemur.input.Button.MOUSE_BUTTON1);
         im.map(F_DENY, com.simsilica.lemur.input.Button.MOUSE_BUTTON3);
+        im.map(F_DENY, KeyInput.KEY_RMENU);
         im.activateGroup(INPUT_GROUP);
         inputInit = true;
     }
@@ -290,13 +287,11 @@ public class NumberInput extends Panel implements AnalogFunctionListener, StateF
         
         @Override
         public void mouseButtonEvent(MouseButtonEvent mbe, Spatial sptl, Spatial sptl1) {
-            if (mbe.getButtonIndex() == MouseInput.BUTTON_LEFT) {
-                if (mbe.isReleased()) {
-                    if (clicked) {
-                        startNumberTyping();
-                        duration = 0f;
-                        clicked = false;
-                    }
+            if (mbe.isPressed() && mbe.getButtonIndex() == MouseInput.BUTTON_LEFT) {
+                if (clicked) {
+                    startNumberTyping();
+                    duration = 0f;
+                    clicked = false;
                 }
                 else clicked = true;
             }
