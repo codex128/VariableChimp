@@ -103,7 +103,7 @@ By default, whenever you cache a variable, it is automatically unregistered, and
 ### Supporting other data types
 VariableChimp provides support out-of-the-box for int, double, float, long, String, Vector3f, and Quaternion. If you want to support another data type, you have to write your own `VariableContainer`. Fortunately, this task is pretty simple!
 
-Take this `VariableContainer` subclass, which supports Vector3f values.
+Take this `VariableContainer` subclass, which supports double values.
 ```
 public class DoubleContainer extends VariableContainer<Double> {
     
@@ -140,3 +140,9 @@ public class DoubleContainer extends VariableContainer<Double> {
 ```
 Here is a breakdown for each method:
 * `initEditingGui()` is where the gui to edit the double value is initialized. Make sure to call the `setReference` method during this thread, which allows VariableChimp to detect when a change was made to the gui. If you do not set the reference, VariableChimp will throw an exception.
+* `pull(double value)` accepts a double value and displays it on the gui.
+* `push()` returns the double value displayed on the gui.
+* `getVariableType()` returns the class of the data type this container is working with (in this case `double.class`). This is important for identifying which variables should be handled by this container class.
+* `create(Variable variable)` creates a new container instance when requested.
+
+Note that both `getVariableType` and `create` are inherited from the `VariableContainerFactory` interface.
