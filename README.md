@@ -1,8 +1,8 @@
 # VariableChimp for JMonkeyEngine3
-VariableChimp allows developers to change fields during runtime using an in-program interface. This can significantly boost development time because programmers would no longer have to restart the program every time they want to tweak a field value.
+VariableChimp allows developers to change fields during runtime using an in-program interface. It is designed to work out-of-the-box and be as easy to use as possible.
 
 # Download
-Go ahead and download the latest stable version of VariableChimp from the [releases]().<br>
+Go ahead and download the latest stable version of VariableChimp from the [releases](https://github.com/codex128/VariableChimp/releases).<br>
 You also need to download a couple libraries:
 * [JMonkeyEngine 3.6](https://github.com/jMonkeyEngine/jmonkeyengine)
 * [Lemur 1.16+](https://github.com/jMonkeyEngine-Contributions/Lemur)
@@ -23,7 +23,7 @@ In the program, press **F1** to toggle the VariableChimp GUI. Edit the position 
 ### What are `Variable` and `Var`?
 `Variable` is an interface for tracking and updating a field. `Var` is the class implementation of `Variable`.
 
-### What do each of these arguments do?
+### What do each argument do?
 * The first argument is the object which stores the field we want to edit. This is known as the *subject*.
 * The second argument indicates what data type we're working with. In this case it's Vector3f.
 * The third and fourth arguments take Push/Pull objects which handle any pushing and pulling that will occur.
@@ -146,3 +146,16 @@ Here is a breakdown for each method:
 * `create(Variable variable)` creates a new container instance when requested.
 
 Note that both `getVariableType` and `create` are inherited from the `VariableContainerFactory` interface.
+
+To put a container in action, it must be registered first.
+```
+VarChimp.get().registerFactory(new DoubleContainer(null));
+```
+
+# Contributing
+Have a great idea for VariableChimp? Become a contributor!
+
+# Thanks
+* [JMonkeyEngine Team](https://jmonkeyengine.org/) for making a great 3D java engine, and answering my questions (even when they were dumb :P).
+* [pspeed42](https://github.com/pspeed42) for developing the Lemur library.
+
