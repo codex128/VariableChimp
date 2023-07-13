@@ -16,8 +16,8 @@ import codex.varchimp.Variable;
  * @author gary
  */
 public class QuaternionContainer extends VariableContainer<Quaternion> {
-    
-    NumberScroller x, y, z;
+
+    NumberInput x, y, z;
     
     /**
      *
@@ -35,17 +35,14 @@ public class QuaternionContainer extends VariableContainer<Quaternion> {
         SpringGridLayout layout = new SpringGridLayout();
         editContainer.setLayout(layout);
         layout.addChild(0, 0, new Label("x:"));
-        x = layout.addChild(0, 1, new NumberScroller());
+        x = layout.addChild(0, 1, new NumberInput());
         x.setModel(VariableContainer.createDefaultModel(Float.class));
-        x.setValueDisplay(new LimitedValueDisplay(5));
         layout.addChild(1, 0, new Label("y:"));
-        y = layout.addChild(1, 1, new NumberScroller());
+        y = layout.addChild(1, 1, new NumberInput());
         y.setModel(VariableContainer.createDefaultModel(Float.class));
-        y.setValueDisplay(new LimitedValueDisplay(5));
         layout.addChild(2, 0, new Label("z:"));
-        z = layout.addChild(2, 1, new NumberScroller());
+        z = layout.addChild(2, 1, new NumberInput());
         z.setModel(VariableContainer.createDefaultModel(Float.class));
-        z.setValueDisplay(new LimitedValueDisplay(5));
         setReference(new CombinedReference(
                 x.getModel().createReference(),
                 y.getModel().createReference(),

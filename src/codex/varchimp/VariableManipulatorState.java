@@ -4,6 +4,7 @@
  */
 package codex.varchimp;
 
+import codex.varchimp.gui.GuiDisplayState;
 import codex.varchimp.gui.VariableContainer;
 import com.jme3.app.Application;
 import com.simsilica.lemur.Container;

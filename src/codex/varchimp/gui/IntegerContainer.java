@@ -4,7 +4,6 @@
  */
 package codex.varchimp.gui;
 
-import com.simsilica.lemur.RangedValueModel;
 import codex.varchimp.Variable;
 
 /**
@@ -14,7 +13,7 @@ import codex.varchimp.Variable;
  */
 public class IntegerContainer extends VariableContainer<Integer> {
     
-    NumberScroller scroller;
+    NumberInput input;
     
     /**
      *
@@ -26,17 +25,16 @@ public class IntegerContainer extends VariableContainer<Integer> {
     
     @Override
     public void initEditingGui() {
-        scroller = addChild(new NumberScroller());
-        scroller.setModel(VariableContainer.createDefaultModel(Integer.class));
-        scroller.setValueDisplay((RangedValueModel model) -> ""+(int)model.getValue());
+        input = addChild(new NumberInput());
+        input.setModel(VariableContainer.createDefaultModel(Integer.class));
     }
     @Override
     protected void pull(Integer value) {
-        scroller.getModel().setValue(value);
+        input.getModel().setValue(value);
     }
     @Override
     protected Integer push() {
-        return (int)scroller.getModel().getValue();
+        return (int)input.getModel().getValue();
     }
     @Override
     public Class getVariableType() {

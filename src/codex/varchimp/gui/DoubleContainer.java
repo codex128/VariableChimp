@@ -13,7 +13,7 @@ import codex.varchimp.Variable;
  */
 public class DoubleContainer extends VariableContainer<Double> {
     
-    NumberScroller scroller;
+    NumberInput scroller;
     
     /**
      *
@@ -25,9 +25,8 @@ public class DoubleContainer extends VariableContainer<Double> {
     
     @Override
     protected void initEditingGui() {
-        scroller = editContainer.addChild(new NumberScroller());
+        scroller = editContainer.addChild(new NumberInput());
         scroller.setModel(VariableContainer.createDefaultModel(Double.class));
-        scroller.setValueDisplay(new LimitedValueDisplay());
         setReference(scroller.getModel().createReference());
     }
     @Override
