@@ -97,3 +97,46 @@ VarChimp.get().applyCacheOrElse("my-group", myObject, () -> {
 ```
 #### Important!
 By default, whenever you cache a variable, it is automatically unregistered, and whenever you apply a cache, it gets removed.
+
+# Customizing VariableChimp
+
+### Supporting other data types
+VariableChimp provides support out-of-the-box for int, double, float, long, String, Vector3f, and Quaternion. If you want to support another data type, you have to write your own `VariableContainer`. Fortunately, this task is pretty simple!
+
+Take this `VariableContainer` subclass, which supports Vector3f values.
+```
+public class DoubleContainer extends VariableContainer<Double> {
+    
+    NumberInput input;
+    
+    public DoubleContainer(Variable variable) {
+        super(variable);
+    }
+    
+    @Override
+    protected void initEditingGui() {
+        input = editContainer.addChild(new NumberInput());
+        input.setModel(VariableContainer.createDefaultModel(Double.class));
+        setReference(input.getModel().createReference());
+    }
+    @Override
+    protected void pull(Double value) {
+        input.getModel().setValue(value);
+    }
+    @Override
+    protected Double push() {
+        return input.getModel().getValue();
+    }
+    @Override
+    public Class getVariableType() {
+        return double.class;
+    }
+    @Override
+    public VariableContainer create(Variable variable) {
+        return new DoubleContainer(variable);
+    }
+    
+}
+```
+Here is a breakdown for each method:
+* `initEditingGui()` is where the gui to edit the double value is initialized. Make sure to call the `setReference` method during this thread, which allows VariableChimp to detect when a change was made to the gui. If you do not set the reference, VariableChimp will throw an exception.
