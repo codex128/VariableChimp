@@ -13,7 +13,7 @@ import codex.varchimp.Variable;
  */
 public class DoubleContainer extends VariableContainer<Double> {
     
-    NumberInput scroller;
+    NumberInput input;
     
     /**
      *
@@ -25,17 +25,17 @@ public class DoubleContainer extends VariableContainer<Double> {
     
     @Override
     protected void initEditingGui() {
-        scroller = editContainer.addChild(new NumberInput());
-        scroller.setModel(VariableContainer.createDefaultModel(Double.class));
-        setReference(scroller.getModel().createReference());
+        input = editContainer.addChild(new NumberInput());
+        input.setModel(VariableContainer.createDefaultModel(Double.class));
+        setReference(input.getModel().createReference());
     }
     @Override
     protected void pull(Double value) {
-        scroller.getModel().setValue(value);
+        input.getModel().setValue(value);
     }
     @Override
     protected Double push() {
-        return scroller.getModel().getValue();
+        return input.getModel().getValue();
     }
     @Override
     public Class getVariableType() {
