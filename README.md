@@ -1,8 +1,8 @@
 # VariableChimp for JMonkeyEngine3
-VariableChimp allows developers to change fields during runtime using an in-program interface. This can significantly boost development time because programmers would no longer have to restart the program every time they want to tweak a field value.
+VariableChimp allows developers to change fields during runtime using an in-program interface. It is designed to work out-of-the-box and be as easy to use as possible.
 
 # Download
-Go ahead and download the latest stable version of VariableChimp from the [releases]().<br>
+Go ahead and download the latest stable version of VariableChimp from the [releases](https://github.com/codex128/VariableChimp/releases).<br>
 You also need to download a couple libraries:
 * [JMonkeyEngine 3.6](https://github.com/jMonkeyEngine/jmonkeyengine)
 * [Lemur 1.16+](https://github.com/jMonkeyEngine-Contributions/Lemur)
@@ -23,7 +23,7 @@ In the program, press **F1** to toggle the VariableChimp GUI. Edit the position 
 ### What are `Variable` and `Var`?
 `Variable` is an interface for tracking and updating a field. `Var` is the class implementation of `Variable`.
 
-### What do each of these arguments do?
+### What do each argument do?
 * The first argument is the object which stores the field we want to edit. This is known as the *subject*.
 * The second argument indicates what data type we're working with. In this case it's Vector3f.
 * The third and fourth arguments take Push/Pull objects which handle any pushing and pulling that will occur.
@@ -97,3 +97,62 @@ VarChimp.get().applyCacheOrElse("my-group", myObject, () -> {
 ```
 #### Important!
 By default, whenever you cache a variable, it is automatically unregistered, and whenever you apply a cache, it gets removed.
+
+# Customizing VariableChimp
+
+### Supporting other data types
+VariableChimp provides support out-of-the-box for int, double, float, long, String, Vector3f, and Quaternion. If you want to support another data type, you have to write your own `VariableContainer`. Fortunately, this task is pretty simple!
+
+Take this `VariableContainer` subclass, which supports double values.
+```
+public class DoubleContainer extends VariableContainer<Double> {
+    
+    NumberInput input;
+    
+    public DoubleContainer(Variable variable) {
+        super(variable);
+    }
+    
+    @Override
+    protected void initEditingGui() {
+        input = editContainer.addChild(new NumberInput());
+        input.setModel(VariableContainer.createDefaultModel(Double.class));
+        setReference(input.getModel().createReference());
+    }
+    @Override
+    protected void pull(Double value) {
+        input.getModel().setValue(value);
+    }
+    @Override
+    protected Double push() {
+        return input.getModel().getValue();
+    }
+    @Override
+    public Class getVariableType() {
+        return double.class;
+    }
+    @Override
+    public VariableContainer create(Variable variable) {
+        return new DoubleContainer(variable);
+    }
+    
+}
+```
+Here is a breakdown for each method:
+* `initEditingGui()` is where the gui to edit the double value is initialized. Make sure to call the `setReference` method during this thread, which allows VariableChimp to detect when a change was made to the gui. If you do not set the reference, VariableChimp will throw an exception.
+* `pull(double value)` accepts a double value and displays it on the gui.
+* `push()` returns the double value displayed on the gui.
+* `getVariableType()` returns the class of the data type this container is working with (in this case `double.class`). This is important for identifying which variables should be handled by this container class.
+* `create(Variable variable)` creates a new container instance when requested.
+
+Note that both `getVariableType` and `create` are inherited from the `VariableContainerFactory` interface.
+
+To put a container in action, it must be registered first.
+```
+VarChimp.get().registerFactory(new DoubleContainer(null));
+```
+
+# Thanks
+* [JMonkeyEngine Team](https://jmonkeyengine.org/) for making a great 3D java engine, and answering my questions (even when they were dumb :P).
+* [pspeed42](https://github.com/pspeed42) for developing the Lemur library.
+
