@@ -152,9 +152,6 @@ To put a container in action, it must be registered first.
 VarChimp.get().registerFactory(new DoubleContainer(null));
 ```
 
-# Contributing
-Have a great idea for VariableChimp? Become a contributor!
-
 # Thanks
 * [JMonkeyEngine Team](https://jmonkeyengine.org/) for making a great 3D java engine, and answering my questions (even when they were dumb :P).
 * [pspeed42](https://github.com/pspeed42) for developing the Lemur library.
