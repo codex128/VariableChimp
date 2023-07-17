@@ -97,8 +97,8 @@ VarChimp.get().applyCacheOrElse("my-group", myObject, () -> {
     VarChimp.get().register(new Var("my-group", myObject, int.class, "num"));
 });
 ```
-#### Important!
-By default, whenever you cache a variable, it is automatically unregistered, and whenever you apply a cache, it gets removed.
+> **Important!**
+> By default, whenever you cache a variable, it is automatically unregistered, and whenever you apply a cache, it gets removed.
 
 # Customizing VariableChimp
 
