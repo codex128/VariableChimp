@@ -2,8 +2,10 @@
 VariableChimp allows developers to change fields during runtime using an in-program interface. It is designed to work out-of-the-box and be as easy to use as possible.
 
 # Download
-Go ahead and download the latest stable version of VariableChimp from the [releases](https://github.com/codex128/VariableChimp/releases).<br>
-You also need to download a couple libraries:
+Go ahead and download the latest stable version of VariableChimp from the [releases](https://github.com/codex128/VariableChimp/releases),<br>
+or you can download the source code and build it yourself.
+
+You also need to download a couple dependencies:
 * [JMonkeyEngine 3.6](https://github.com/jMonkeyEngine/jmonkeyengine)
 * [Lemur 1.16+](https://github.com/jMonkeyEngine-Contributions/Lemur)
 
@@ -39,7 +41,7 @@ Pushing is exactly the opposite of pulling. Instead of applying the field to the
 So when you press the "Push" button in the GUI, it takes the value displayed on the GUI and applies it to the world.
 
 ### Variable Groups
-Putting variables in the same group is a great way to quickly access that set of variables, for whatever you need. The `Var` class has a setter for the group, or you can use a constructor to set it. Variables can change groups at any time.
+Putting variables in the same group is a great way to quickly access that set of variables again, for whatever you need. The `Var` class has a setter for the group, or you can use a constructor to set it. Variables can change groups at any time.
 
 Variable has a setter method for the group name.
 ```
@@ -56,7 +58,7 @@ VarChimp.get().setDefaultGroup("my-group");
 ```
 
 ### Direct Field Access
-Normally, `Push` and `Pull` access getters and setters in order to change fields. However, `FieldPull` and `FieldPush` directly access the field of the subject. They each require one string, which should be the exact name of the field. This can be useful when there aren't getter/setter methods available.
+Normally, `Push` and `Pull` access getters and setters in order to change fields. However, `FieldPull` and `FieldPush` directly access the field of the subject. They each require one string, which should be the exact name of the field. This can be useful when there aren't getter/setter methods already available.
 ```
 new Var(myObject, int.class, new FieldPull("num"), new FieldPush("num"));
 ```
@@ -147,9 +149,36 @@ Here is a breakdown for each method:
 
 Note that both `getVariableType` and `create` are inherited from the `VariableContainerFactory` interface.
 
-To put a container in action, it must be registered first.
+To put this container in action, a `VariableContainerFactory` that assembles this container must be registered. In most cases, you can simply create an instance of that container and register it (since all VariableContainers implement VariableContainerFactory).
 ```
 VarChimp.get().registerFactory(new DoubleContainer(null));
+```
+
+### Listening to VariableChimp
+The `VarChimpListener` interface is used to listen for VariableChimp actions.
+```
+public class MyObject implements VarChimpListener {
+    @Override
+    public void onStateEnabled(AppState state) {
+        // called whenever a VariableChimp state we are listening to is enabled
+    }
+    @Override
+    public void onStateDisabled(AppState state) {
+        // called whenever a VariableChimp state we are listening to is disabled
+    }
+    @Override
+    public void onGuiEnabled() {
+        // called whenever the VariableChimp gui is enabled because there is something to display
+    }
+    @Override
+    public void onGuiDisabled() {
+        // called whenever the VariableChimp gui is disabled because there is nothing to display
+    }
+}
+```
+If you'd like to do something whenever the VariableChimp gui is enabled, implement VarChimpListener and add it to the `GuiDisplayState`.
+```
+VarChimp.getGuiRoot().addListener(myListener);
 ```
 
 # Thanks
